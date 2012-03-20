@@ -80,7 +80,8 @@ public class Planner {
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
 		
-		UnitView goalSpace = state.getUnit(goalId); //end space //NEEDS TO JUST BE GOAL OF TALLY
+		STRIP goalSpace = new STRIP(); //end space //NEEDS TO JUST BE GOAL OF TALLY
+		goalSpace.unit = state.getUnit(goalId);
 		
 		ArrayList<STRIP> openList = new ArrayList<STRIP>(); //the open list, will hold items to be searched
 		ArrayList<STRIP> closedList = new ArrayList<STRIP>(); //spaces all ready searched
