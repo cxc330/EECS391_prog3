@@ -3,6 +3,7 @@ package edu.cwru.SimpleRTS.agent;
 import java.util.*;
 
 import edu.cwru.SimpleRTS.action.*;
+import edu.cwru.SimpleRTS.environment.State;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
 import edu.cwru.SimpleRTS.model.unit.Unit;
@@ -10,7 +11,7 @@ import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
 import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
-public class Agent1 extends Agent {
+public class PEAgent extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	static int playernum = 0;
@@ -19,36 +20,39 @@ public class Agent1 extends Agent {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
+	private int finalGoldTally = 200;
+	private int finalWoodTally = 200;
+	private boolean canBuildPeasant = false;
+	private String planFileName = "plan.txt";
 
-	public Agent1(int playernum) {
+	public PEAgent(int playernum) {
 		super(playernum);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Map<Integer, Action> initialStep(StateView state) {
-		// TODO Auto-generated method stub
 		return middleStep(state);
 	}
 
 	@Override
-	public Map<Integer, Action> middleStep(StateView state) {
-		
-		
+	public Map<Integer, Action> middleStep(StateView state) 
+	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		
 		List<Integer> allUnitIds = state.getAllUnitIds();
-		
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
 		
-		if	(townHallIds.size() > 0) //If the town hall isn't dead
+		//create Planner
+		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant);
+		
+		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
-			actions = aStarSearch(peasantIds.get(0), townHallIds.get(0), state);
+			actions = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
+			actions = readPlan(planFileName);
 		}	
 		else
 		{
-			System.out.println("Either we killed the townhall!!! ...or you didn't provide one");
+			System.out.println("TownHall.size() <= 0. Where is it?!!");
 		}
 		
 		if(actions == null)
@@ -60,14 +64,19 @@ public class Agent1 extends Agent {
 
 	@Override
 	public void terminalStep(StateView state) {
-		// TODO Auto-generated method stub
 
 	}
 	
-	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
-		
+	//reads a plan txt file and returns the actions to take
+	public Map<Integer, Action> readPlan(String filename)
+	{
+		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+		return actions;
+	}
+	
+	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)
+	{
 		List<Integer> unitIds = new ArrayList<Integer>();
-		
 		for (int x = 0; x < ids.size(); x++)
 		{
 			Integer unitId = ids.get(x);
@@ -78,11 +87,10 @@ public class Agent1 extends Agent {
 				unitIds.add(unitId);
 			}
 		}
-		
 		return unitIds;
 	}
 	
-	public Map<Integer, Action> aStarSearch(Integer startId, Integer goalId, StateView state)	{
+	/*public Map<Integer, Action> aStarSearch(Integer startId, Integer goalId, StateView state)	{
 		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		
@@ -394,6 +402,6 @@ public class Agent1 extends Agent {
 		}
 		
 		return false;
-	}
+	}*/
 
 }
