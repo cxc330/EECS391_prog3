@@ -33,6 +33,8 @@ public class Planner {
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan;
+	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
+	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
 	
 	public Planner(StateView startState, int finalGoldAmount, int finalWoodAmount, boolean canBuildP)
 	{
@@ -49,7 +51,7 @@ public class Planner {
 		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
 		
 		addResources(Type.GOLD_MINE, gold, startState);
-		addResources(Type.TREE, gold, startState);
+		addResources(Type.TREE, lumber, startState);
 		
 	}
 	
@@ -57,23 +59,14 @@ public class Planner {
 	public void addResources(Type resourceType, ArrayList<ResourceInfo> resources, StateView state)
 	{
 		List<Integer> resourceIds = state.getResourceNodeIds(resourceType);
-		
 		for (Integer resourceId: resourceIds)
 		{
 			ResourceInfo resource = new ResourceInfo();
-			
 			resource.x = state.getResourceNode(resourceId).getXPosition();
 			resource.y = state.getResourceNode(resourceId).getYPosition();
-			
+			resource.totalAvailable = state.getResourceNode(resourceId).getAmountRemaining();
 			resources.add(resource);
 		}
-		
-		//JEFF ADD totalAvailable TO EACH RESOURCE SHOULD BE BASED ON DISTANCE FROM TOWNHALL
-		/*
-		 * 
-		 * ADDD ME
-		 * 
-		 */
 	}
 	
 	//originally A* search
