@@ -6,6 +6,7 @@ import java.util.*;
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
+import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
 import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
@@ -22,6 +23,8 @@ public class Planner {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
+	static String lumber = "lumber";
+	static String gold = "gold";
 	private int finalGoldTally = 200;
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
@@ -295,11 +298,25 @@ public class Planner {
 	/*
 	 * 
 	 * 
-	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR MINE... IF RECOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
+	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RECOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
+	 * FIXED: cjg28 10:01AM
+	 * NEEDS TESTED
 	 */
-	public UnitView createOpenSpace(Integer x, Integer y) //creates a dummy UnitView at the requested space
+	public UnitView createOpenSpace(Integer x, Integer y, StateView state) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
+		
+		if (state.isResourceAt(x, y))
+		{
+			String resourceName = getResourceType(x, y, state);
+			
+			if (resourceName != null)
+			{
+				template.setUnitName(resourceName);
+			}
+		}
+		
+
 		Unit unit = new Unit(template, y);	//The actual Unit
 		
 		unit.setxPosition(x); //set its x
@@ -308,6 +325,36 @@ public class Planner {
 		UnitView openSpace = new UnitView(unit); //make a UnitView from it
 		
 		return openSpace; //return the UnitView
+	}
+	
+	/*
+	 * Returns type of resource.. if no resource there returns null
+	 * 
+	 */
+	public String getResourceType(Integer x, Integer y, StateView state)
+	{
+		Type goldType = Type.GOLD_MINE;
+		Type lumberType = Type.TREE;
+		
+		List<Integer> goldNodes = state.getResourceNodeIds(goldType);
+		List<Integer> lumberNodes = state.getResourceNodeIds(lumberType);
+		
+		for (Integer goldNode: goldNodes)
+		{
+			if (state.getResourceNode(goldNode).getXPosition() == x && state.getResourceNode(goldNode).getYPosition() == y)
+			{
+				return gold;
+			}
+		}
+		for (Integer lumberNode: lumberNodes)
+		{
+			if (state.getResourceNode(lumberNode).getXPosition() == x && state.getResourceNode(lumberNode).getYPosition() == y)
+			{
+				return lumber;
+			}
+		}
+		
+		return null;
 	}
 	
 	/*
@@ -371,7 +418,7 @@ public class Planner {
 					break;
 			}
 			
-			UnitView neighbor = createOpenSpace(tempX, tempY); //make a dummy space
+			UnitView neighbor = createOpenSpace(tempX, tempY, state); //make a dummy space
 			
 			if(checkValidNeighbor(tempX, tempY, state, unitDoesntMatter)) //check if it's a valid space
 			{
