@@ -75,7 +75,7 @@ public class Planner {
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
-		startSpace.gold.addAll(gold);
+		startSpace.gold.add(gold);
 		
 		STRIP goalSpace = new STRIP(); //end space //NEEDS TO JUST BE GOAL OF TALLY
 		goalSpace.unit = state.getUnit(goalId);
@@ -377,8 +377,6 @@ public class Planner {
 	
 	/*
 	 * NEEDS TO PASS IN STATEVIEW TO SPACE MAKER FOR RESOURCE POSSIBILITY
-	 * 
-	 * 
 	 */
 	public ArrayList<UnitView> getNeighbors(UnitView currentParent, StateView state, boolean unitDoesntMatter) //returns neighbors 
 	{
@@ -454,23 +452,47 @@ public class Planner {
 	 */
 	public Integer heuristicCostCalculator(STRIP a, STRIP b)	{ 
 		
-		ArrayList<ResourceInfo> gold = a.gold;
-		ArrayList<ResourceInfo> wood = a.lumber;
+		ArrayList<ResourceInfo> goldArr = a.gold;
+		ArrayList<ResourceInfo> woodArr = a.lumber;
 		
-		if (b.unit.getTemplateView().getUnitName().equals(gold))
+		if(b.hasGold || b.hasWood)
 		{
-			;//do gold
-		}
-		else if(b.unit.getTemplateView().getUnitName().equals(wood))
-		{
-			;//do wood
+			if (b.unit.getTemplateView().getUnitName().equals(gold))
+			{
+				return 1000;//do gold collection
+			}
+			else if(b.unit.getTemplateView().getUnitName().equals(lumber))
+			{
+				return 1000;//do wood collection
+			}
+			else if(b.unit.getTemplateView().getUnitName().equals(townHall))
+			{
+				return 0;//Deposit Wood/Gold
+			}
+			else
+			{
+				return 1;//do move
+			}
 		}
 		else
 		{
-			;//do move
+			if (b.unit.getTemplateView().getUnitName().equals(gold))
+			{
+				return 0;//do gold collection
+			}
+			else if(b.unit.getTemplateView().getUnitName().equals(lumber))
+			{
+				return 0;//do wood collection
+			}
+			else if(b.unit.getTemplateView().getUnitName().equals(townHall))
+			{
+				return 1000;//Deposit Wood/Gold
+			}
+			else
+			{
+				return 1;//do move
+			}
 		}
-		
-		return 0;
 	}
 	
 	/*
