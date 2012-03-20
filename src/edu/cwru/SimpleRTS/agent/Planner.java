@@ -236,7 +236,7 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
-		if ((!node.hasGold && nearestGold != null) || (!node.hasWood && nearestLumber != null))
+		if ((!node.hasGold && !node.hasWood && (nearestGold != null || nearestLumber != null)) )
 		{
 			if (node.goldCollected < finalGoldTally && nearestGold != null)
 			{
@@ -252,9 +252,10 @@ public class Planner {
 				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), move);			
 			}
 		}
-		else
+		else //move to townhall
 		{
 			List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
+			System.out.println("CREATING TOWNHALL");
 			moveMove.unit = createOpenSpace(state.getUnit(townHallIds.get(0)).getXPosition(), state.getUnit(townHallIds.get(0)).getYPosition(), gather);
 		}
 		
