@@ -30,9 +30,9 @@ public class Planner {
 	
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
-	private ArrayList<String> plan;
-	private int finalGoldTally = 200;
-	private int finalWoodTally = 200;
+	private ArrayList<String> plan = new ArrayList<String>();
+	private int finalGoldTally = 1000;
+	private int finalWoodTally = 1000;
 	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
@@ -438,10 +438,12 @@ public class Planner {
 		{
 			returnPath.add(backwardsPath.get(i));
 			STRIP action = backwardsPath.get(i);
-			System.out.println("Path action: " + action.unit.getTemplateView().getUnitName() + " FROM: "
-					+ action.unit.getXPosition() + ", " + action.unit.getYPosition());
+			String output = "Path action: " + action.unit.getTemplateView().getUnitName() + " FROM: "
+					+ action.unit.getXPosition() + ", " + action.unit.getYPosition() + "\n";
+			plan.add(output);
+			System.out.print(output);
 		}
-		
+		writeListToFile(plan, planFileName);
 		return returnPath;		
 	}
 	
