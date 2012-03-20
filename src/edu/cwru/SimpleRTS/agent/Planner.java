@@ -73,9 +73,6 @@ public class Planner {
 		 */
 	}
 	
-	/*
-	 * NEED TO CHANGE HASHING TO INCLUDE EXTRA THINGS SUCH AS CURRENT RESOURCES
-	 */
 	//originally A* search
 	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
 		
