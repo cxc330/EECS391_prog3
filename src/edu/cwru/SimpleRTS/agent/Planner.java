@@ -593,22 +593,36 @@ public class Planner {
 	 * 
 	 */
 	public Integer heuristicCostCalculator(STRIP a, STRIP b)	{ 
-		
-		ArrayList<ResourceInfo> goldArr = a.gold;
-		ArrayList<ResourceInfo> woodArr = a.lumber;
+				
+		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected;
 		
 		if (a.unit.getTemplateView().getUnitName() == gather)
 		{
-			;//gather
+			if (a.hasGold)
+			{
+				hCost -= (int)(goldWeCanCarry * .5);
+			}
+			else if (a.hasWood)
+			{
+				hCost -= (int)(woodWeCanCarry * .5);
+			}
 		}
 		else if (a.unit.getTemplateView().getUnitName() == deposit)
 		{
-			;//deposit
+			if (!a.hasGold)
+			{
+				hCost -= (int)(goldWeCanCarry * .5);
+			}
+			else if (!a.hasWood)
+			{
+				hCost -= (int)(woodWeCanCarry * .5);
+			}
 		}
 		else if (a.unit.getTemplateView().getUnitName() == move)
 		{
-			;//move
+			hCost -= (int)DistanceMetrics.chebyshevDistance(a.unit.getXPosition(), a.unit.getYPosition(), b.unit.getXPosition(), b.unit.getYPosition());
 		}
+		return hCost;
 	}
 	
 	/*
