@@ -97,7 +97,7 @@ public class Planner {
 		{
 			STRIP currentParent = getLowestCostF(openList, fCost); //finds the STRIP with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " 
+			System.out.println("Searching.. " + currentParent.unit.getTemplateView().getUnitName() + " " + currentParent.unit.getXPosition() + ", " 
 					+ currentParent.unit.getYPosition() + 
 					" There are " + openList.size() + " items on the OL");
 			
@@ -118,7 +118,8 @@ public class Planner {
 				
 				for (STRIP neighbor : neighbors) //loop for all neighbors
 				{
-					System.out.println("Searching neighbor at : " + neighbor.unit.getTemplateView().getUnitName() + "");
+					System.out.println("Searching neighbor at : " + neighbor.unit.getTemplateView().getUnitName() + " to " +
+							 neighbor.unit.getXPosition() + ", " + neighbor.unit.getYPosition());
 					
 					if (checkXYList(closedList, neighbor) == (null)) //only go if the neighbor isn't all ready checked
 					{
@@ -142,7 +143,6 @@ public class Planner {
 						
 						if (better)
 						{
-							System.out.println("hmmm");
 							gCost.put(neighbor, tempGCost); //add the gCost to our hash
 							parentNodes.put(neighbor, currentParent); //add the parent reference
 
@@ -236,6 +236,7 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
+		
 		if ((!node.hasGold && !node.hasWood && (nearestGold != null || nearestLumber != null)) )
 		{
 			if (node.goldCollected < finalGoldTally && nearestGold != null)
@@ -255,8 +256,9 @@ public class Planner {
 		else //move to townhall
 		{
 			List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
-			System.out.println("CREATING TOWNHALL");
-			moveMove.unit = createOpenSpace(state.getUnit(townHallIds.get(0)).getXPosition(), state.getUnit(townHallIds.get(0)).getYPosition(), gather);
+			moveMove.unit = createOpenSpace(state.getUnit(townHallIds.get(0)).getXPosition(), state.getUnit(townHallIds.get(0)).getYPosition(), move);
+			moveMove.hasGold = node.hasGold;
+			moveMove.hasWood = node.hasWood;
 		}
 		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
@@ -269,18 +271,21 @@ public class Planner {
 		
 		if (checkValidDeposit(node, state) != null)
 		{
+			System.out.println("VALID DEPO");
+			if (node.hasGold)
+				System.out.println("GOT THE GOLD");
 			depositMove.gold.addAll(node.gold);
 			depositMove.lumber.addAll(node.lumber);
 			depositMove.goldCollected = node.goldCollected;
 			depositMove.woodCollected = node.woodCollected;
 			
-			if (depositMove.hasGold)
+			if (node.hasGold)
 			{
 				depositMove.goldCollected += goldWeCanCarry;
 				depositMove.hasGold = false;
 				returnActions.add(depositMove);
 			}
-			else if (depositMove.hasWood)
+			else if (node.hasWood)
 			{
 				depositMove.woodCollected += woodWeCanCarry;
 				depositMove.hasWood = false;
