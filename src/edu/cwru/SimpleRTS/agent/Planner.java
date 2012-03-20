@@ -374,7 +374,8 @@ public class Planner {
 	{
 		Integer cost = gCost.get(currentParent); //currentParent's gCost
 		
-		cost += 1; //heuristicCostCalculator(currentParent, neighbor); //just uses chubeycasdyasi for(neighor, parent) + parent's cost
+		cost += DistanceMetrics.chebyshevDistance(neighbor.unit.getXPosition(), neighbor.unit.getYPosition(),
+				currentParent.unit.getXPosition(), currentParent.unit.getYPosition());
 		
 		return cost;
 		
