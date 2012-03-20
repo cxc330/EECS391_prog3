@@ -3,11 +3,8 @@ package edu.cwru.SimpleRTS.agent;
 import java.io.*;
 import java.util.*;
 
-import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
-import edu.cwru.SimpleRTS.model.Direction;
 import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
-import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
@@ -17,7 +14,6 @@ import edu.cwru.SimpleRTS.util.DistanceMetrics;
 public class Planner {
 
 	private static final long serialVersionUID = 1L;
-	static int playernum = 0;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
 	static String farm = "Farm";
@@ -28,11 +24,16 @@ public class Planner {
 	static String move = "move";
 	static String gather = "gather";
 	static String deposit = "deposit";
-	private int finalGoldTally = 200;
-	private int finalWoodTally = 200;
+	static int goldWeCanCarry = 50;
+	static int woodWeCanCarry = 20;
+	static int playernum = 0;
+	
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan;
+	private int finalGoldTally = 200;
+	private int finalWoodTally = 200;
+	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
 	
@@ -40,19 +41,11 @@ public class Planner {
 	{
 		finalGoldTally = finalGoldAmount;
 		finalWoodTally = finalWoodAmount;
-		canBuildPeasant = canBuildP;
+		canBuildPeasant = canBuildP;		
 		
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		List<Integer> allUnitIds = startState.getAllUnitIds();
-		List<Integer> peasantIds = findUnitType(allUnitIds, startState, peasant);
-		List<Integer> townHallIds = findUnitType(allUnitIds, startState, townHall);
 		
-		ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
-		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
-		
-		addResources(Type.GOLD_MINE, gold, startState);
-		addResources(Type.TREE, lumber, startState);
-		
+		addResources(Type.GOLD_MINE, goldList, startState);
+		addResources(Type.TREE, lumberList, startState);		
 	}
 	
 	
@@ -65,14 +58,14 @@ public class Planner {
 			resource.x = state.getResourceNode(resourceId).getXPosition();
 			resource.y = state.getResourceNode(resourceId).getYPosition();
 			resource.totalAvailable = state.getResourceNode(resourceId).getAmountRemaining();
+			resource.type = resourceType;
 			resources.add(resource);
 		}
 	}
 	
 	//originally A* search
-	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
-		
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+	public ArrayList<STRIP> generatePlan(Integer startId, Integer goalId, StateView state)	
+	{		
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
 		startSpace.gold.addAll(goldList);
@@ -104,28 +97,22 @@ public class Planner {
 		{
 			STRIP currentParent = getLowestCostF(openList, fCost); //finds the STRIP with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " + currentParent.unit.getYPosition() + 
+			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " 
+					+ currentParent.unit.getYPosition() + 
 					" There are " + openList.size() + " items on the OL");
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
-				System.out.println("Woot, found the goal");			
+				System.out.println("Woot, found the goal");					
 				
-				{
-					/*
-					 * TODO: CHANGE TO RETURN LIST
-					 */
-					actions = null;
-					//actions = rebuildPath(parentNodes, currentParent, startSpace); 
-				}
-				return actions; 
+				return rebuildPath(parentNodes, currentParent, startSpace);
 			}
 			else //keep on searching
 			{
 				openList.remove(currentParent); //remove the object from the openList and add it to the closed list
 				closedList.add(currentParent);
 				
-				ArrayList<STRIP> neighbors = getActions(currentParent); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
+				ArrayList<STRIP> neighbors = getActions(currentParent, state); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
 				
 				System.out.println("Found " + neighbors.size() + " neighbors");
 				
@@ -140,7 +127,10 @@ public class Planner {
 						boolean better = true; //used to check if we found a better gCost in the case of the node all ready being in the openList
 						STRIP tempNeighbor = neighbor; //temp used in case the neighbor isn't in the openList yet
 						
-						neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
+						if (openList.indexOf(neighbor) > -1)
+							neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
+						else
+							neighbor = null;
 						
 						if (neighbor == (null)) //If the openList doesn't contain this neighbor
 						{
@@ -171,37 +161,157 @@ public class Planner {
 		return null; //returns null if we don't find anything
 	}
 	
-	public ArrayList<STRIP> getActions(STRIP node)
+	/*
+	 * Returns nearest resource. If none harvestable it returns null
+	 * 
+	 * 
+	 */
+	public ResourceInfo findNearestResource(STRIP node, ArrayList<ResourceInfo> resources)
 	{
+		ResourceInfo returnResource = null;
+		int minDistance = -1;
 		
+		for (ResourceInfo resource: resources)
+		{
+			if (resource.totalAvailable > 0) //ensure it's not a dead node
+			{
+				Integer distance = DistanceMetrics.chebyshevDistance(node.unit.getXPosition(), node.unit.getYPosition(),
+						resource.x, resource.y);
+				if (minDistance == -1 || distance < minDistance)
+				{
+					minDistance = distance; 
+					returnResource = resource;
+				}
+			}
+		}
+		
+		return returnResource;
+	}
+	
+	public UnitView checkValidDeposit(STRIP node, StateView state)
+	{		
+		List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
+		
+		for (Integer townHallId: townHallIds)
+		{
+			UnitView townHall = state.getUnit(townHallId);
+			
+			if (townHall.getXPosition() == node.unit.getXPosition()
+					&& townHall.getYPosition() == node.unit.getYPosition())
+			{
+				return townHall;
+			}
+		}
+		
+		return null;
+	}
+	
+	public ResourceInfo checkValidGather(STRIP node, StateView state)
+	{	
+		ArrayList<ResourceInfo> resources = new ArrayList<ResourceInfo>();
+		resources.addAll(node.gold);
+		resources.addAll(node.lumber);
+		
+		for (ResourceInfo resource: resources)
+		{			
+			if (resource.x == node.unit.getXPosition()
+					&& resource.y == node.unit.getYPosition() && resource.totalAvailable > 0)
+			{
+				return resource;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	public ArrayList<STRIP> getActions(STRIP node, StateView state)
+	{		
 		ArrayList<STRIP> returnActions = new ArrayList<STRIP>();
 		
 		STRIP moveMove =  new STRIP();
 		STRIP depositMove = new STRIP();
 		STRIP gatherMove = new STRIP();
 		
-		moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");
-		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "deposit");
-		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "gather");
+		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
+		ResourceInfo nearestGold = findNearestResource(node, node.gold);
+		if ((!node.hasGold && nearestGold != null) || (!node.hasWood && nearestLumber != null))
+		{
+			if (node.goldCollected < finalGoldTally && nearestGold != null)
+			{
+				UnitView temp = createOpenSpace(nearestGold.x, nearestGold.y, move);
+				moveMove.unit = temp;
+			}
+			else if (node.woodCollected < finalWoodTally && nearestLumber != null)
+			{
+				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, move);
+			}
+			else //we have collected enough supplies don't move
+			{
+				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), move);			
+			}
+		}
+		else
+		{
+			List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
+			moveMove.unit = state.getUnit(townHallIds.get(0));
+		}
+		
+		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
+		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), gather);
 		
 		moveMove.gold.addAll(node.gold);
 		moveMove.lumber.addAll(node.lumber);
 		moveMove.goldCollected = node.goldCollected;
 		moveMove.woodCollected = node.woodCollected;
 		
-		depositMove.gold.addAll(node.gold);
-		depositMove.lumber.addAll(node.lumber);
-		depositMove.goldCollected = node.goldCollected;
-		depositMove.woodCollected = node.woodCollected;
-		
+		if (checkValidDeposit(node, state) != null)
+		{
+			depositMove.gold.addAll(node.gold);
+			depositMove.lumber.addAll(node.lumber);
+			depositMove.goldCollected = node.goldCollected;
+			depositMove.woodCollected = node.woodCollected;
+			
+			if (depositMove.hasGold)
+			{
+				depositMove.goldCollected += goldWeCanCarry;
+				depositMove.hasGold = false;
+				returnActions.add(depositMove);
+			}
+			else if (depositMove.hasWood)
+			{
+				depositMove.woodCollected += woodWeCanCarry;
+				depositMove.hasWood = false;
+				returnActions.add(depositMove);
+			}
+			
+		}
+
 		gatherMove.gold.addAll(node.gold);
 		gatherMove.lumber.addAll(node.lumber);
 		gatherMove.goldCollected = node.goldCollected;
 		gatherMove.woodCollected = node.woodCollected;
+		ResourceInfo validResource = checkValidGather(node, state);
+		
+		if (validResource != null)
+		{
+			if (validResource.type == Type.GOLD_MINE)
+			{
+				validResource.totalAvailable -= goldWeCanCarry;
+				validResource.collected += goldWeCanCarry;
+				gatherMove.hasGold = true;
+				returnActions.add(gatherMove);
+			}
+			else if (validResource.type == Type.TREE)
+			{
+				validResource.totalAvailable -= woodWeCanCarry;
+				validResource.collected += woodWeCanCarry;
+				gatherMove.hasWood = true;
+				returnActions.add(gatherMove);
+			}
+		}
 		
 		returnActions.add(moveMove);
-		returnActions.add(depositMove);
-		returnActions.add(gatherMove);
 		
 		return returnActions;		
 	}
@@ -253,7 +363,8 @@ public class Planner {
 	{
 		Integer cost = gCost.get(currentParent); //currentParent's gCost
 		
-		cost += 1; //heuristicCostCalculator(currentParent, neighbor); //just uses chubeycasdyasi for(neighor, parent) + parent's cost
+		cost += DistanceMetrics.chebyshevDistance(neighbor.unit.getXPosition(), neighbor.unit.getYPosition(),
+				currentParent.unit.getXPosition(), currentParent.unit.getYPosition());
 		
 		return cost;
 		
@@ -301,13 +412,13 @@ public class Planner {
 	 * MOVE TO peAGENT
 	 */
 	//returns the path from start to goal
-	public Map<Integer, Action> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
+	public ArrayList<STRIP> rebuildPath(HashMap<STRIP, STRIP> parentNodes, STRIP goalParent, STRIP startParent)
 	{
-		ArrayList<UnitView> backwardsPath = new ArrayList<UnitView>(); //The path backwards
-		Map<Integer, Action> path = new HashMap<Integer, Action>(); //The return set of actions
+		ArrayList<STRIP> backwardsPath = new ArrayList<STRIP>(); //The path backwards
 		backwardsPath.add(goalParent); //add the goal as our first action
+		ArrayList<STRIP> returnPath = new ArrayList<STRIP>();
 		
-		UnitView parentNode = parentNodes.get(goalParent);
+		STRIP parentNode = parentNodes.get(goalParent);
 		backwardsPath.add(parentNode);
 		
 		while (!parentNode.equals(startParent)) //run till we find the starting node
@@ -318,36 +429,13 @@ public class Planner {
 		
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
-			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
-			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
-			
-			Direction d = Direction.EAST; //default value
-			
-			if(xDiff < 0 && yDiff > 0) //NW
-				d = Direction.NORTHEAST;
-			else if(xDiff == 0 && yDiff > 0) //N
-				d = Direction.NORTH;
-			else if(xDiff > 0 && yDiff > 0) //NE
-				d = Direction.NORTHWEST;
-			else if(xDiff < 0 && yDiff == 0) //E
-				d = Direction.EAST;
-			else if(xDiff < 0 && yDiff < 0) //SE
-				d = Direction.SOUTHEAST;
-			else if(xDiff == 0 && yDiff < 0) //S
-				d = Direction.SOUTH;
-			else if(xDiff > 0 && yDiff < 0) //SW
-				d = Direction.SOUTHWEST;
-			else if(xDiff > 0 && yDiff == 0) //W
-				d = Direction.WEST;
-			if (i == backwardsPath.size()-1) //only put on the first action
-			{
-				path.put(backwardsPath.get(i).getID(), Action.createPrimitiveMove(backwardsPath.get(i).getID(), d));
-			}
-			System.out.println("Path action: " + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + " Direction: " + d.toString());
+			returnPath.add(backwardsPath.get(i));
+			STRIP action = backwardsPath.get(i);
+			System.out.println("Path action: " + action.unit.getTemplateView().getUnitName() + " FROM: "
+					+ action.unit.getXPosition() + ", " + action.unit.getYPosition());
 		}
 		
-		return path;
-		
+		return returnPath;		
 	}
 	
 	/*
