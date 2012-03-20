@@ -251,15 +251,15 @@ public class Planner {
 		{
 			if (node.goldCollected < finalGoldTally)
 			{
-				moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, "move");
+				moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, move);
 			}
 			else if (node.woodCollected < finalWoodTally)
 			{
-				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, "move");
+				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, move);
 			}
 			else //we have collected enough supplies don't move
 			{
-				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");			
+				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), move);			
 			}
 		}
 		else
@@ -268,8 +268,8 @@ public class Planner {
 			moveMove.unit = state.getUnit(townHallIds.get(0));
 		}
 		
-		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "deposit");
-		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "gather");
+		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
+		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), gather);
 		
 		moveMove.gold.addAll(node.gold);
 		moveMove.lumber.addAll(node.lumber);
