@@ -147,6 +147,13 @@ public class Planner {
 		}
 		return unitIds;
 	}
+	/*
+	 * REWORK: NEEDS TO CHECK GOAL BASED ON IF NEIGHBOR = DEPOSIT THEN WIN
+	 * 
+	 * 
+	 * 
+	 */
+	
 	
 	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
 	{
@@ -170,6 +177,14 @@ public class Planner {
 		return false;
 	}
 	
+	
+	/*
+	 * NEEDS TO USE gCOST of DEPTH NO LONGER DISTANCE
+	 * 
+	 * 
+	 * 
+	 */
+	
 	//this calculates the distance between neighbor and currentParent + the g_score of currentParent
 	public Integer gCostCalculator(UnitView neighbor, UnitView currentParent, HashMap<UnitView, Integer> gCost)
 	{
@@ -181,6 +196,12 @@ public class Planner {
 		
 	}
 	
+	
+	/*
+	 * I BELIEVE THIS WILL BE USELESS
+	 * 
+	 * 
+	 */
 	public UnitView checkXYList(ArrayList<UnitView> list, UnitView unit) //Used for checking based on whether or not we all ready have the space of values: x, y
 	{
 		Integer x = unit.getXPosition();
@@ -210,6 +231,12 @@ public class Planner {
 		return lowestCostF; //return our lowest cost
 	}
 	
+	
+	/*
+	 * 
+	 * 
+	 * MOVE TO peAGENT
+	 */
 	//returns the path from start to goal
 	public Map<Integer, Action> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
 	{
@@ -260,6 +287,11 @@ public class Planner {
 		
 	}
 	
+	/*
+	 * 
+	 * 
+	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR MINE... IF RECOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
+	 */
 	public UnitView createOpenSpace(Integer x, Integer y) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
@@ -273,6 +305,11 @@ public class Planner {
 		return openSpace; //return the UnitView
 	}
 	
+	/*
+	 * NEEDS TO PASS IN STATEVIEW TO SPACE MAKER FOR RESOURCE POSSIBILITY
+	 * 
+	 * 
+	 */
 	public ArrayList<UnitView> getNeighbors(UnitView currentParent, StateView state, boolean unitDoesntMatter) //returns neighbors 
 	{
 		//NOTE: boolean unitDoesntMatter tells it whether we care about whether or not the space is occupied
@@ -340,6 +377,11 @@ public class Planner {
 		return neighbors;
 	}
 	
+	/*
+	 * NEEDS TO JUST BE AMOUNT OF GOLD WE HAVE
+	 * 
+	 * 
+	 */
 	public Integer heuristicCostCalculator(UnitView a, UnitView b)	{ //Just uses Chebyshev distances
 	
 		/*Pseudocode for heuristic or something like that
@@ -368,6 +410,11 @@ public class Planner {
 		return (DistanceMetrics.chebyshevDistance(x1, y1, x2, y2));
 	}
 	
+	/*
+	 * 
+	 * NEEDS TO CHANGE AND BE MODIFIED FOR RESOURCE.. MAYBE EVEN DELETED
+	 * 
+	 */
 	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter) //returns if a space is empty and valid
 	{
 		boolean isResource = state.isResourceAt(x, y); //check if there is a resource here
