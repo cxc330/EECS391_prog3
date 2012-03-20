@@ -75,10 +75,13 @@ public class Planner {
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
-		startSpace.gold.add(gold);
+		startSpace.gold.addAll(goldList);
+		startSpace.lumber.addAll(lumberList);
 		
 		STRIP goalSpace = new STRIP(); //end space //NEEDS TO JUST BE GOAL OF TALLY
 		goalSpace.unit = state.getUnit(goalId);
+		goalSpace.goldCollected = finalGoldTally;
+		goalSpace.woodCollected = finalWoodTally;
 		
 		ArrayList<STRIP> openList = new ArrayList<STRIP>(); //the open list, will hold items to be searched
 		ArrayList<STRIP> closedList = new ArrayList<STRIP>(); //spaces all ready searched
