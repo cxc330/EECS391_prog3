@@ -30,6 +30,8 @@ public class Planner {
 	static String deposit = "deposit";
 	private int finalGoldTally = 200;
 	private int finalWoodTally = 200;
+	static int goldWeCanCarry = 50;
+	static int woodWeCanCarry = 20;
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan;
@@ -42,10 +44,9 @@ public class Planner {
 		finalWoodTally = finalWoodAmount;
 		canBuildPeasant = canBuildP;
 		
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		List<Integer> allUnitIds = startState.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, startState, peasant);
-		List<Integer> townHallIds = findUnitType(allUnitIds, startState, townHall);
+		
 		
 		ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
 		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
@@ -65,6 +66,7 @@ public class Planner {
 			resource.x = state.getResourceNode(resourceId).getXPosition();
 			resource.y = state.getResourceNode(resourceId).getYPosition();
 			resource.totalAvailable = state.getResourceNode(resourceId).getAmountRemaining();
+			resource.type = resourceType;
 			resources.add(resource);
 		}
 	}
@@ -125,7 +127,7 @@ public class Planner {
 				openList.remove(currentParent); //remove the object from the openList and add it to the closed list
 				closedList.add(currentParent);
 				
-				ArrayList<STRIP> neighbors = getActions(currentParent); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
+				ArrayList<STRIP> neighbors = getActions(currentParent, state); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
 				
 				System.out.println("Found " + neighbors.size() + " neighbors");
 				
@@ -171,16 +173,94 @@ public class Planner {
 		return null; //returns null if we don't find anything
 	}
 	
-	public ArrayList<STRIP> getActions(STRIP node)
+	/*
+	 * Returns nearest resource. If none harvestable it returns null
+	 * 
+	 * 
+	 */
+	public ResourceInfo findNearestResource(STRIP node, ArrayList<ResourceInfo> resources)
 	{
+		ResourceInfo returnResource = null;
+		int minDistance = -1;
 		
+		for (ResourceInfo resource: resources)
+		{
+			if (resource.totalAvailable > 0) //ensure it's not a dead node
+			{
+				Integer distance = DistanceMetrics.chebyshevDistance(node.unit.getXPosition(), node.unit.getYPosition(),
+						resource.x, resource.y);
+				if (minDistance == -1 || distance < minDistance)
+				{
+					minDistance = distance; 
+					returnResource = resource;
+				}
+			}
+		}
+		
+		return returnResource;
+	}
+	
+	public UnitView checkValidDeposit(STRIP node, StateView state)
+	{		
+		List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
+		
+		for (Integer townHallId: townHallIds)
+		{
+			UnitView townHall = state.getUnit(townHallId);
+			
+			if (townHall.getXPosition() == node.unit.getXPosition()
+					&& townHall.getYPosition() == node.unit.getYPosition())
+			{
+				return townHall;
+			}
+		}
+		
+		return null;
+	}
+	
+	public ResourceInfo checkValidGather(STRIP node, StateView state)
+	{	
+		ArrayList<ResourceInfo> resources = new ArrayList<ResourceInfo>();
+		resources.addAll(node.gold);
+		resources.addAll(node.lumber);
+		
+		for (ResourceInfo resource: resources)
+		{			
+			if (resource.x == node.unit.getXPosition()
+					&& resource.y == node.unit.getYPosition() && resource.totalAvailable > 0)
+			{
+				return resource;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	public ArrayList<STRIP> getActions(STRIP node, StateView state)
+	{		
 		ArrayList<STRIP> returnActions = new ArrayList<STRIP>();
 		
 		STRIP moveMove =  new STRIP();
 		STRIP depositMove = new STRIP();
 		STRIP gatherMove = new STRIP();
 		
-		moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");
+		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
+		ResourceInfo nearestGold = findNearestResource(node, node.gold);
+		
+		if (node.goldCollected < finalGoldTally)
+		{
+			moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, "move");
+		}
+		else if (node.woodCollected < finalWoodTally)
+		{
+			moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, "move");
+		}
+		else //we have collected enough supplies don't move
+		{
+			moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");			
+		}
+		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "deposit");
 		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "gather");
 		
@@ -189,19 +269,53 @@ public class Planner {
 		moveMove.goldCollected = node.goldCollected;
 		moveMove.woodCollected = node.woodCollected;
 		
-		depositMove.gold.addAll(node.gold);
-		depositMove.lumber.addAll(node.lumber);
-		depositMove.goldCollected = node.goldCollected;
-		depositMove.woodCollected = node.woodCollected;
-		
+		if (checkValidDeposit(node, state) != null)
+		{
+			depositMove.gold.addAll(node.gold);
+			depositMove.lumber.addAll(node.lumber);
+			depositMove.goldCollected = node.goldCollected;
+			depositMove.woodCollected = node.woodCollected;
+			
+			if (depositMove.hasGold)
+			{
+				depositMove.goldCollected += goldWeCanCarry;
+				depositMove.hasGold = false;
+				returnActions.add(depositMove);
+			}
+			else if (depositMove.hasWood)
+			{
+				depositMove.woodCollected += woodWeCanCarry;
+				depositMove.hasWood = false;
+				returnActions.add(depositMove);
+			}
+			
+		}
+
 		gatherMove.gold.addAll(node.gold);
 		gatherMove.lumber.addAll(node.lumber);
 		gatherMove.goldCollected = node.goldCollected;
 		gatherMove.woodCollected = node.woodCollected;
+		ResourceInfo validResource = checkValidGather(node, state);
+		
+		if (validResource != null)
+		{
+			if (validResource.type == Type.GOLD_MINE)
+			{
+				validResource.totalAvailable -= goldWeCanCarry;
+				validResource.collected += goldWeCanCarry;
+				gatherMove.hasGold = true;
+				returnActions.add(gatherMove);
+			}
+			else if (validResource.type == Type.TREE)
+			{
+				validResource.totalAvailable -= woodWeCanCarry;
+				validResource.collected += woodWeCanCarry;
+				gatherMove.hasWood = true;
+				returnActions.add(gatherMove);
+			}
+		}
 		
 		returnActions.add(moveMove);
-		returnActions.add(depositMove);
-		returnActions.add(gatherMove);
 		
 		return returnActions;		
 	}
