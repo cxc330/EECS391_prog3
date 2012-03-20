@@ -22,47 +22,18 @@ public class AStarPath {
 	private int playernum = 0;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
-	private Integer startid = 0;
-	private Integer goalid = 0;
 
 	//Constructor
-	public AStarPath(int playerNum, Integer startID, Integer goalID) 
+	public AStarPath(int playerNum) 
 	{
 		playernum = playerNum;
-		startid = startID;
-		goalid = goalID;
-	}
-
-	public Map<Integer, Action> findPath(StateView state) {
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		//List<Integer> allUnitIds = state.getAllUnitIds();
-		//List<Integer> footmanIds = findUnitType(allUnitIds, state, peasant);
-		//List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
-		
-		/*if(townHallIds.size() > 0) //Town Hall not dead
-		{
-			actions = aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
-		}	
-		else 
-		{
-			System.out.println("Either we killed the townhall!!! ...or you didn't provide one");
-		}
-		*/
-		
-		actions = aStarSearch(startid, goalid, state);
-		
-		if(actions == null)
-		{
-			actions = new HashMap<Integer, Action>();
-		}
-		
-		return actions;
 	}
 	
 	//A* Search Algorithm
-	public Map<Integer, Action> aStarSearch(Integer startId, Integer goalId, StateView state)	{
+	public ArrayList<UnitView> findPath(Integer startId, Integer goalId, StateView state)	{
 		
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+		//Map<Integer, Action> actions = new HashMap<Integer, Action>();
+		ArrayList<UnitView> returnList = new ArrayList<UnitView>();
 		
 		//Start space and end space
 		UnitView startSpace = state.getUnit(startId);
@@ -92,21 +63,12 @@ public class AStarPath {
 		while (openList.size() > 0)
 		{
 			UnitView currentParent = getLowestCostF(openList, fCost); //finds the UnitView with the lowest fCost
-			System.out.println("Searching.. " + currentParent.getXPosition() + ", " + currentParent.getYPosition() + " There are " + openList.size() + " items on the OL");
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
 				System.out.println("Woot, found the goal");
-				if(currentParent.equals(startSpace)) //The starting space is the final space, attack the townHall
-				{
-					Action attack = Action.createPrimitiveAttack(startSpace.getID(), goalSpace.getID());
-					actions.put(startSpace.getID(), attack);
-				}
-				else
-				{
-					actions = rebuildPath(parentNodes, currentParent, startSpace); 
-				}
-				return actions; 
+				returnList = rebuildPath(parentNodes, currentParent, startSpace); 
+				return returnList; 
 			}
 			else
 			{
@@ -152,9 +114,8 @@ public class AStarPath {
 					}					
 				}
 			}
-		}		
-		System.out.println("No path from search space to goal...");
-		return null; //returns null if we don't find anything
+		}
+		return null; //no path
 	}
 	
 	//matches units with a type and returns the list of unitIds
@@ -237,10 +198,11 @@ public class AStarPath {
 	}
 	
 	//returns the path from start to goal
-	public Map<Integer, Action> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
+	public ArrayList<UnitView> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
 	{
 		ArrayList<UnitView> backwardsPath = new ArrayList<UnitView>(); //The path backwards
-		Map<Integer, Action> path = new HashMap<Integer, Action>(); //The return set of actions
+		ArrayList<UnitView> forwardPath = new ArrayList<UnitView>();
+		//Map<Integer, Action> path = new HashMap<Integer, Action>(); //The return set of actions
 		backwardsPath.add(goalParent); //add the goal as our first action
 		
 		UnitView parentNode = parentNodes.get(goalParent);
@@ -253,6 +215,12 @@ public class AStarPath {
 			backwardsPath.add(parentNode);
 		}
 		
+		for(int i = 1; i <= backwardsPath.size(); i++)
+		{
+			forwardPath.add(backwardsPath.get(backwardsPath.size()-i));
+		}
+		
+		/*
 		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
@@ -283,8 +251,9 @@ public class AStarPath {
 			}
 			System.out.println("Path action: " + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + " Direction: " + d.toString());
 		}
-		
 		return path;
+		*/
+		return forwardPath;
 		
 	}
 	
