@@ -592,17 +592,23 @@ public class Planner {
 	 * IF b == NODE AND WE ARE EMPTY THEN hCOST = 0
 	 * 
 	 */
-	public Integer heuristicCostCalculator(STRIP initial, STRIP goal)	
-	{ 
-		if(initial.hasGold || initial.hasWood)
+	public Integer heuristicCostCalculator(STRIP a, STRIP b)	{ 
+		
+		ArrayList<ResourceInfo> goldArr = a.gold;
+		ArrayList<ResourceInfo> woodArr = a.lumber;
+		
+		if (a.unit.getTemplateView().getUnitName() == gather)
 		{
-			
+			;//gather
 		}
-		else
+		else if (a.unit.getTemplateView().getUnitName() == deposit)
 		{
-			
+			;//deposit
 		}
-		return goal.goldCollected - initial.goldCollected;
+		else if (a.unit.getTemplateView().getUnitName() == move)
+		{
+			;//move
+		}
 	}
 	
 	/*
