@@ -597,44 +597,19 @@ public class Planner {
 		ArrayList<ResourceInfo> goldArr = a.gold;
 		ArrayList<ResourceInfo> woodArr = a.lumber;
 		
-		if(b.hasGold || b.hasWood)
+		if (a.unit.getTemplateView().getUnitName() == gather)
 		{
-			if (b.unit.getTemplateView().getUnitName().equals(gold))
-			{
-				return 1000;//do gold collection
-			}
-			else if(b.unit.getTemplateView().getUnitName().equals(lumber))
-			{
-				return 1000;//do wood collection
-			}
-			else if(b.unit.getTemplateView().getUnitName().equals(townHall))
-			{
-				return 0;//Deposit Wood/Gold
-			}
-			else
-			{
-				return 1;//do move
-			}
+			;//gather
 		}
-		else
+		else if (a.unit.getTemplateView().getUnitName() == deposit)
 		{
-			if (b.unit.getTemplateView().getUnitName().equals(gold))
-			{
-				return 0;//do gold collection
-			}
-			else if(b.unit.getTemplateView().getUnitName().equals(lumber))
-			{
-				return 0;//do wood collection
-			}
-			else if(b.unit.getTemplateView().getUnitName().equals(townHall))
-			{
-				return 1000;//Deposit Wood/Gold
-			}
-			else
-			{
-				return 1;//do move
-			}
+			;//deposit
 		}
+		else if (a.unit.getTemplateView().getUnitName() == move)
+		{
+			;//move
+		}
+		
 	}
 	
 	/*
