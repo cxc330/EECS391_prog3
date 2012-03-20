@@ -198,24 +198,10 @@ public class Planner {
 	 * 
 	 * 
 	 */	
-	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
+	public boolean checkGoal(STRIP neighbor, STRIP goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
 	{
 		
-		ArrayList<UnitView> units = getNeighbors(neighbor, state, true);
-		
-		Integer x = goal.getXPosition();
-		Integer y = goal.getYPosition();
-		
-		for (UnitView unit : units) //for all neighbors
-		{
-			Integer unitX = unit.getXPosition();
-			Integer unitY = unit.getYPosition();
-			
-			if (x == unitX && y == unitY) //if it's the same as the goal x, y
-			{
-				return true; //we found it!
-			}
-		}
+		//if (neighbor.)
 		
 		return false;
 	}

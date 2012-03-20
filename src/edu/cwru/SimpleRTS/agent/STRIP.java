@@ -9,6 +9,8 @@ public class STRIP {
 	public UnitView unit; //used for x,y position of peasant
 	public ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
+	public Integer goldCollected = 0;
+	public Integer woodCollected = 0;
 	public boolean hasGold = false;
 	public boolean hasWood = false;
 }
