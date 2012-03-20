@@ -460,36 +460,29 @@ public class Planner {
 	}
 	
 	/*
-	 * NEEDS TO JUST BE AMOUNT OF GOLD WE HAVE
-	 * 
+	 * NEEDS TO CALCULATE WHICH MOVE IS BEST
+	 * IF b == NODE AND WE ARE EMPTY THEN hCOST = 0
 	 * 
 	 */
-	public Integer heuristicCostCalculator(UnitView a, UnitView b)	{ //Just uses Chebyshev distances
-	
-		/*Pseudocode for heuristic or something like that
-		  
-		  if(peasant.count < 3 && state.getResourceAmount(playernum, ResourceType.GOLD) <= state.getUnit(peasants.get(0)).getTemplateView().getGoldCost())
-		  {
-		  		generate(); //say this is low cost though removing gold is high cost
-		  }
-		  else
-		  {
-		  	if(peasant.gold < maxGoldPeasantcanCarry || peasant.wood < maxWoodPeasantCanCarry)
-		  	{
-		  		move();
-		  	}
-		  	else
-		  	{
-		  		returnToDeposit();
-		  	}
-		  }
-		 */
-		int x1 = a.getXPosition();
-		int x2 = b.getXPosition();
-		int y1 = a.getYPosition();
-		int y2 = b.getYPosition();
+	public Integer heuristicCostCalculator(STRIP a, STRIP b)	{ 
 		
-		return (DistanceMetrics.chebyshevDistance(x1, y1, x2, y2));
+		ArrayList<ResourceInfo> gold = a.gold;
+		ArrayList<ResourceInfo> wood = a.lumber;
+		
+		if (b.unit.getTemplateView().getUnitName().equals(gold))
+		{
+			;//do gold
+		}
+		else if(b.unit.getTemplateView().getUnitName().equals(wood))
+		{
+			;//do wood
+		}
+		else
+		{
+			;//do move
+		}
+		
+		return 0;
 	}
 	
 	/*
