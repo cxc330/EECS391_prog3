@@ -100,8 +100,6 @@ public class Planner {
 			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " 
 					+ currentParent.unit.getYPosition() + 
 					" There are " + openList.size() + " items on the OL");
-			if (currentParent.unit.getXPosition()  == 9)
-				return null;
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
@@ -122,7 +120,7 @@ public class Planner {
 				{
 					System.out.println("Searching neighbor at : " + neighbor.unit.getTemplateView().getUnitName() + "");
 					
-					if (closedList.contains(neighbor) == false) //only go if the neighbor isn't all ready checked
+					if (checkXYList(closedList, neighbor) == (null)) //only go if the neighbor isn't all ready checked
 					{
 						tempGCost = gCostCalculator(neighbor, currentParent, gCost); //grab it's gCost
 						
@@ -144,6 +142,7 @@ public class Planner {
 						
 						if (better)
 						{
+							System.out.println("hmmm");
 							gCost.put(neighbor, tempGCost); //add the gCost to our hash
 							parentNodes.put(neighbor, currentParent); //add the parent reference
 
@@ -151,7 +150,11 @@ public class Planner {
 							
 							fCost.put(neighbor, tempFCost); //add the value to our hash
 						} 
-					}					
+					}
+					else
+					{
+						//System.out.println("")
+					}
 				}
 			}
 		}		
@@ -383,7 +386,8 @@ public class Planner {
 		{
 			if (item.unit.getXPosition() == (x) && item.unit.getYPosition() == (y) && 
 					item.goldCollected == unit.goldCollected && item.woodCollected == unit.woodCollected &&
-					item.hasWood == unit.hasWood && item.hasGold == unit.hasGold) //if it's there
+					item.hasWood == unit.hasWood && item.hasGold == unit.hasGold &&
+					item.unit.getTemplateView().getUnitName().equals(unit.unit.getTemplateView().getUnitName())) //if it's there
 				return item; //return it
 		}
 		return null; //otherwise return nothing
