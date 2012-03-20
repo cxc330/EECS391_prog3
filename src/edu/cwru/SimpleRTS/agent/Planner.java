@@ -100,6 +100,8 @@ public class Planner {
 			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " 
 					+ currentParent.unit.getYPosition() + 
 					" There are " + openList.size() + " items on the OL");
+			if (currentParent.unit.getXPosition()  == 9)
+				return null;
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
@@ -126,13 +128,9 @@ public class Planner {
 						
 						boolean better = true; //used to check if we found a better gCost in the case of the node all ready being in the openList
 						STRIP tempNeighbor = neighbor; //temp used in case the neighbor isn't in the openList yet
+						neighbor = checkXYList(openList, neighbor);
 						
-						if (openList.indexOf(neighbor) > -1)
-							neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
-						else
-							neighbor = null;
-						
-						if (neighbor == (null)) //If the openList doesn't contain this neighbor
+						if (neighbor == null) //If the openList doesn't contain this neighbor
 						{
 							neighbor = tempNeighbor;
 							tempHCost = heuristicCostCalculator(neighbor, goalSpace); //get the costs of the starting node
@@ -254,7 +252,7 @@ public class Planner {
 		else
 		{
 			List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
-			moveMove.unit = state.getUnit(townHallIds.get(0));
+			moveMove.unit = createOpenSpace(state.getUnit(townHallIds.get(0)).getXPosition(), state.getUnit(townHallIds.get(0)).getYPosition(), gather);
 		}
 		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
@@ -376,14 +374,16 @@ public class Planner {
 	 * 
 	 * 
 	 */
-	public UnitView checkXYList(ArrayList<UnitView> list, UnitView unit) //Used for checking based on whether or not we all ready have the space of values: x, y
+	public STRIP checkXYList(ArrayList<STRIP> list, STRIP unit) //Used for checking based on whether or not we all ready have the space of values: x, y
 	{
-		Integer x = unit.getXPosition();
-		Integer y = unit.getYPosition();
+		Integer x = unit.unit.getXPosition();
+		Integer y = unit.unit.getYPosition();
 		
-		for (UnitView item : list) //for every item in the list
+		for (STRIP item : list) //for every item in the list
 		{
-			if (item.getXPosition() == (x) && item.getYPosition() == (y)) //if it's there
+			if (item.unit.getXPosition() == (x) && item.unit.getYPosition() == (y) && 
+					item.goldCollected == unit.goldCollected && item.woodCollected == unit.woodCollected &&
+					item.hasWood == unit.hasWood && item.hasGold == unit.hasGold) //if it's there
 				return item; //return it
 		}
 		return null; //otherwise return nothing
@@ -606,6 +606,10 @@ public class Planner {
 			{
 				hCost -= (int)(woodWeCanCarry * .5);
 			}
+		}
+		else if (a.unit.getTemplateView().getUnitName() == move)
+		{
+			hCost += 50;
 		}
 		return hCost;
 	}
