@@ -1,20 +1,22 @@
+/********
+ * File: SearchAgent.java
+ * By: Christopher Gross, Chien-Hung Chen
+ * Email: cjg28@case.edu, cxc330@case.edu
+ * Created: 2/1/2012
+ */
+
 package edu.cwru.SimpleRTS.agent;
 
-import java.io.*;
 import java.util.*;
-
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
-import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
-import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
 import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
-
-public class Planner {
+public class AStarPath extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	static int playernum = 0;
@@ -23,34 +25,73 @@ public class Planner {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
-	static String lumber = "lumber";
-	static String gold = "gold";
-	private int finalGoldTally = 200;
-	private int finalWoodTally = 200;
-	private boolean canBuildPeasant = false;
-	private String planFileName = "plan.txt";
-	private ArrayList<String> plan;
-	
-	public Planner(StateView startState, int finalGoldAmount, int finalWoodAmount, boolean canBuildP)
-	{
-		finalGoldTally = finalGoldAmount;
-		finalWoodTally = finalWoodAmount;
-		canBuildPeasant = canBuildP;
+
+	//Constructor
+	public AStarPath(int playernum) {
+		super(playernum);
+	}
+
+	@Override
+	public Map<Integer, Action> initialStep(StateView state) {
+		return middleStep(state);
+	}
+
+	@Override
+	public Map<Integer, Action> middleStep(StateView state) {
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		List<Integer> allUnitIds = startState.getAllUnitIds();
-		List<Integer> peasantIds = findUnitType(allUnitIds, startState, peasant);
-		List<Integer> townHallIds = findUnitType(allUnitIds, startState, townHall);
+		List<Integer> allUnitIds = state.getAllUnitIds();
+		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
+		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
+		
+		
+		if(townHallIds.size() > 0) //Town Hall not dead
+		{
+			actions = aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
+		}	
+		else 
+		{
+			System.out.println("Either we killed the townhall!!! ...or you didn't provide one");
+		}
+		
+		if(actions == null)
+		{
+			actions = new HashMap<Integer, Action>();
+		}
+		
+		return actions;
+	}
+
+	@Override
+	public void terminalStep(StateView state) {
 	}
 	
-	/*
-	 * NEED TO CHANGE HASHING TO INCLUDE EXTRA THINGS SUCH AS CURRENT RESOURCES
-	 */
-	//originally A* search
-	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
+	//matches units with a type and returns the list of unitIds
+	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
+		
+		List<Integer> unitIds = new ArrayList<Integer>();
+		
+		for (int x = 0; x < ids.size(); x++)
+		{
+			Integer unitId = ids.get(x);
+			UnitView unit = state.getUnit(unitId);
+			
+			if(unit.getTemplateView().getUnitName().equals(name))
+			{
+				unitIds.add(unitId);
+			}
+		}
+		
+		return unitIds;
+	}
+	
+	//A* Search Algorithm
+	public Map<Integer, Action> aStarSearch(Integer startId, Integer goalId, StateView state)	{
 		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		UnitView startSpace = state.getUnit(startId); //starting space
-		UnitView goalSpace = state.getUnit(goalId); //end space //NEEDS TO JUST BE GOAL OF TALLY
+		
+		//Start space and end space
+		UnitView startSpace = state.getUnit(startId);
+		UnitView goalSpace = state.getUnit(goalId);
 		
 		ArrayList<UnitView> openList = new ArrayList<UnitView>(); //the open list, will hold items to be searched
 		ArrayList<UnitView> closedList = new ArrayList<UnitView>(); //spaces all ready searched
@@ -72,27 +113,27 @@ public class Planner {
 		System.out.println("Start space: " + startSpace.getXPosition()  + ", " + startSpace.getYPosition());
 		System.out.println("Goal space: " + goalSpace.getXPosition()  + ", " + goalSpace.getYPosition());
 		
-		while (openList.size() > 0) //loop till we exhaust the openList
+		//loop till we exhaust the openList
+		while (openList.size() > 0)
 		{
 			UnitView currentParent = getLowestCostF(openList, fCost); //finds the UnitView with the lowest fCost
-
 			System.out.println("Searching.. " + currentParent.getXPosition() + ", " + currentParent.getYPosition() + " There are " + openList.size() + " items on the OL");
+			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
 				System.out.println("Woot, found the goal");
-				
 				if(currentParent.equals(startSpace)) //The starting space is the final space, attack the townHall
 				{
 					Action attack = Action.createPrimitiveAttack(startSpace.getID(), goalSpace.getID());
 					actions.put(startSpace.getID(), attack);
 				}
-				else //not quite there
+				else
 				{
 					actions = rebuildPath(parentNodes, currentParent, startSpace); 
 				}
 				return actions; 
 			}
-			else //keep on searching
+			else
 			{
 				openList.remove(currentParent); //remove the object from the openList and add it to the closed list
 				closedList.add(currentParent);
@@ -141,42 +182,21 @@ public class Planner {
 		return null; //returns null if we don't find anything
 	}
 	
-	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	
-	{
-		List<Integer> unitIds = new ArrayList<Integer>();
-		for (int x = 0; x < ids.size(); x++)
-		{
-			Integer unitId = ids.get(x);
-			UnitView unit = state.getUnit(unitId);
-			
-			if(unit.getTemplateView().getUnitName().equals(name))
-			{
-				unitIds.add(unitId);
-			}
-		}
-		return unitIds;
-	}
-	
-	/*
-	 * REWORK: NEEDS TO CHECK GOAL BASED ON IF NEIGHBOR = DEPOSIT && RESOURCE TALLY = GOAL TALLY THEN WIN
-	 * 
-	 * 
-	 * 
-	 */	
-	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
+	//Checks if we have reached the goal based on if a neighbor is the goalSpace
+	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state)
 	{
 		
 		ArrayList<UnitView> units = getNeighbors(neighbor, state, true);
-		
 		Integer x = goal.getXPosition();
 		Integer y = goal.getYPosition();
 		
-		for (UnitView unit : units) //for all neighbors
+		//Check each neighbor and determine if it is the goal
+		for (UnitView unit : units)
 		{
 			Integer unitX = unit.getXPosition();
 			Integer unitY = unit.getYPosition();
 			
-			if (x == unitX && y == unitY) //if it's the same as the goal x, y
+			if (x == unitX && y == unitY) //check against goal x, y
 			{
 				return true; //we found it!
 			}
@@ -185,42 +205,25 @@ public class Planner {
 		return false;
 	}
 	
-	
-	/*
-	 * NEEDS TO USE gCOST of DEPTH NO LONGER DISTANCE
-	 * EDITED: cjg28
-	 * SHOULD NOW JUST add one to indicate it's depth
-	 * 
-	 */
-	
-	//this calculates the distance between neighbor and currentParent + the g_score of currentParent
+	//Calculates the distance between neighbor and currentParent + the g_score of currentParent
 	public Integer gCostCalculator(UnitView neighbor, UnitView currentParent, HashMap<UnitView, Integer> gCost)
 	{
-		Integer cost = gCost.get(currentParent); //currentParent's gCost
-		
-		cost += 1; //heuristicCostCalculator(currentParent, neighbor); //just uses chubeycasdyasi for(neighor, parent) + parent's cost
-		
-		return cost;
-		
+		return gCost.get(currentParent) + heuristicCostCalculator(currentParent, neighbor);
 	}
 	
-	
-	/*
-	 * I BELIEVE THIS WILL BE USELESS
-	 * 
-	 * 
-	 */
-	public UnitView checkXYList(ArrayList<UnitView> list, UnitView unit) //Used for checking based on whether or not we all ready have the space of values: x, y
+	//Determines if we already have the space of values: x, y
+	public UnitView checkXYList(ArrayList<UnitView> list, UnitView unit)
 	{
 		Integer x = unit.getXPosition();
 		Integer y = unit.getYPosition();
 		
-		for (UnitView item : list) //for every item in the list
+		//if something from list is in unit's position, return it
+		for (UnitView item : list)
 		{
-			if (item.getXPosition() == (x) && item.getYPosition() == (y)) //if it's there
-				return item; //return it
+			if (item.getXPosition() == (x) && item.getYPosition() == (y))
+				return item;
 		}
-		return null; //otherwise return nothing
+		return null; //default return value
 	}
 	
 	//Goes through oList and checks against Hashmap fCost to find the UnitView with the lowest fCost
@@ -239,12 +242,6 @@ public class Planner {
 		return lowestCostF; //return our lowest cost
 	}
 	
-	
-	/*
-	 * 
-	 * 
-	 * MOVE TO peAGENT
-	 */
 	//returns the path from start to goal
 	public Map<Integer, Action> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
 	{
@@ -255,12 +252,14 @@ public class Planner {
 		UnitView parentNode = parentNodes.get(goalParent);
 		backwardsPath.add(parentNode);
 		
-		while (!parentNode.equals(startParent)) //run till we find the starting node
+		//run till we find the starting node
+		while (!parentNode.equals(startParent))
 		{
 			parentNode = parentNodes.get(parentNode);
 			backwardsPath.add(parentNode);
 		}
 		
+		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
 			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
@@ -295,28 +294,10 @@ public class Planner {
 		
 	}
 	
-	/*
-	 * 
-	 * 
-	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RESOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
-	 * FIXED: cjg28 10:01AM
-	 * NEEDS TESTED
-	 */
-	public UnitView createOpenSpace(Integer x, Integer y, StateView state) //creates a dummy UnitView at the requested space
+	//creates a dummy UnitView at the requested space
+	public UnitView createOpenSpace(Integer x, Integer y)
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
-		
-		if (state.isResourceAt(x, y))
-		{
-			String resourceName = getResourceType(x, y, state);
-			
-			if (resourceName != null)
-			{
-				template.setUnitName(resourceName);
-			}
-		}
-		
-
 		Unit unit = new Unit(template, y);	//The actual Unit
 		
 		unit.setxPosition(x); //set its x
@@ -327,42 +308,8 @@ public class Planner {
 		return openSpace; //return the UnitView
 	}
 	
-	/*
-	 * Returns type of resource.. if no resource there returns null
-	 * 
-	 */
-	public String getResourceType(Integer x, Integer y, StateView state)
-	{
-		Type goldType = Type.GOLD_MINE;
-		Type lumberType = Type.TREE;
-		
-		List<Integer> goldNodes = state.getResourceNodeIds(goldType);
-		List<Integer> lumberNodes = state.getResourceNodeIds(lumberType);
-		
-		for (Integer goldNode: goldNodes)
-		{
-			if (state.getResourceNode(goldNode).getXPosition() == x && state.getResourceNode(goldNode).getYPosition() == y)
-			{
-				return gold;
-			}
-		}
-		for (Integer lumberNode: lumberNodes)
-		{
-			if (state.getResourceNode(lumberNode).getXPosition() == x && state.getResourceNode(lumberNode).getYPosition() == y)
-			{
-				return lumber;
-			}
-		}
-		
-		return null;
-	}
-	
-	/*
-	 * NEEDS TO PASS IN STATEVIEW TO SPACE MAKER FOR RESOURCE POSSIBILITY
-	 * 
-	 * 
-	 */
-	public ArrayList<UnitView> getNeighbors(UnitView currentParent, StateView state, boolean unitDoesntMatter) //returns neighbors 
+	//returns an ArrayList of plausible neighbors
+	public ArrayList<UnitView> getNeighbors(UnitView currentParent, StateView state, boolean unitDoesntMatter)
 	{
 		//NOTE: boolean unitDoesntMatter tells it whether we care about whether or not the space is occupied
 		//		It should ONLY be set to true if we are checking goals or cheating...
@@ -375,12 +322,12 @@ public class Planner {
 		Integer xMinusOne = x - 1;
 		Integer yPlusOne = y + 1;
 		Integer yMinusOne = y - 1;		
-		
 		Integer tempX = 0, tempY = 0;
 		
-		for (int j = 0; j < 8; j++) //go through all possible 8 squares
+		//checking all 8 possible spaces in a grid world
+		for (int j = 0; j < 8; j++)
 		{
-			switch(j) //Could use something better but it's too much thinking right now
+			switch(j)
 			{
 				case 0: //x + 1, y
 					tempX = xPlusOne;
@@ -418,7 +365,7 @@ public class Planner {
 					break;
 			}
 			
-			UnitView neighbor = createOpenSpace(tempX, tempY, state); //make a dummy space
+			UnitView neighbor = createOpenSpace(tempX, tempY); //make a dummy space
 			
 			if(checkValidNeighbor(tempX, tempY, state, unitDoesntMatter)) //check if it's a valid space
 			{
@@ -429,46 +376,15 @@ public class Planner {
 		return neighbors;
 	}
 	
-	/*
-	 * NEEDS TO JUST BE AMOUNT OF GOLD WE HAVE
-	 * 
-	 * 
-	 */
-	public Integer heuristicCostCalculator(UnitView a, UnitView b)	{ //Just uses Chebyshev distances
-	
-		/*Pseudocode for heuristic or something like that
-		  
-		  if(peasant.count < 3 && state.getResourceAmount(playernum, ResourceType.GOLD) <= state.getUnit(peasants.get(0)).getTemplateView().getGoldCost())
-		  {
-		  		generate(); //say this is low cost though removing gold is high cost
-		  }
-		  else
-		  {
-		  	if(peasant.gold < maxGoldPeasantcanCarry || peasant.wood < maxWoodPeasantCanCarry)
-		  	{
-		  		move();
-		  	}
-		  	else
-		  	{
-		  		returnToDeposit();
-		  	}
-		  }
-		 */
-		int x1 = a.getXPosition();
-		int x2 = b.getXPosition();
-		int y1 = a.getYPosition();
-		int y2 = b.getYPosition();
-		
-		return (DistanceMetrics.chebyshevDistance(x1, y1, x2, y2));
+	//Using chebyshev as our h(n)
+	public Integer heuristicCostCalculator(UnitView a, UnitView b)	
+	{
+		return DistanceMetrics.chebyshevDistance(a.getXPosition(), a.getYPosition(), b.getXPosition(), b.getYPosition());
 	}
 	
-	/*
-	 * 
-	 * NEEDS TO CHANGE AND BE MODIFIED FOR RESOURCE.. MAYBE EVEN DELETED
-	 * 
-	 */
-	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter) //returns if a space is empty and valid
-	{
+	//returns if a space is empty and valid
+	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter)	
+	{ 
 		boolean isResource = state.isResourceAt(x, y); //check if there is a resource here
 		boolean isUnit = state.isUnitAt(x, y); //check if there is a unit here
 		boolean isValid = state.inBounds(x, y); //check if the square is valid
@@ -482,23 +398,5 @@ public class Planner {
 		
 		return false;
 	}
-	
-	public void writeListToFile(ArrayList<String> a, String fileName)
-	{
-		try //create file edit and write
-		{
-			FileWriter fstream = new FileWriter(fileName);
-			BufferedWriter planFile = new BufferedWriter(fstream);
-			for(int i = 0; i < a.size(); i++)
-			{
-				planFile.write(a.get(i));
-				planFile.newLine();
-			}
-			planFile.close();
-		}
-		catch (Exception e)
-		{
-			System.err.println("Error: " + e.getMessage());
-		}
-	}	
+
 }

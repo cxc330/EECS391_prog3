@@ -17,9 +17,6 @@ public class PEAgent extends Agent {
 	static int playernum = 0;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
-	static String farm = "Farm";
-	static String barracks = "Barracks";
-	static String footman = "Footman";
 	private int finalGoldTally = 200;
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
@@ -48,7 +45,6 @@ public class PEAgent extends Agent {
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actions = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
-			actions = readPlan(planFileName);
 		}	
 		else
 		{
@@ -65,13 +61,6 @@ public class PEAgent extends Agent {
 	@Override
 	public void terminalStep(StateView state) {
 
-	}
-	
-	//reads a plan txt file and returns the actions to take
-	public Map<Integer, Action> readPlan(String filename)
-	{
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		return actions;
 	}
 	
 	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)
