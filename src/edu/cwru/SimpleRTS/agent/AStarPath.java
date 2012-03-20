@@ -16,35 +16,30 @@ import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
 import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
-public class AStarPath extends Agent {
+public class AStarPath {
 
 	private static final long serialVersionUID = 1L;
-	static int playernum = 0;
+	private int playernum = 0;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
-	static String farm = "Farm";
-	static String barracks = "Barracks";
-	static String footman = "Footman";
+	private Integer startid = 0;
+	private Integer goalid = 0;
 
 	//Constructor
-	public AStarPath(int playernum) {
-		super(playernum);
+	public AStarPath(int playerNum, Integer startID, Integer goalID) 
+	{
+		playernum = playerNum;
+		startid = startID;
+		goalid = goalID;
 	}
 
-	@Override
-	public Map<Integer, Action> initialStep(StateView state) {
-		return middleStep(state);
-	}
-
-	@Override
-	public Map<Integer, Action> middleStep(StateView state) {
+	public Map<Integer, Action> findPath(StateView state) {
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		List<Integer> allUnitIds = state.getAllUnitIds();
-		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
-		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
+		//List<Integer> allUnitIds = state.getAllUnitIds();
+		//List<Integer> footmanIds = findUnitType(allUnitIds, state, peasant);
+		//List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
 		
-		
-		if(townHallIds.size() > 0) //Town Hall not dead
+		/*if(townHallIds.size() > 0) //Town Hall not dead
 		{
 			actions = aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
 		}	
@@ -52,6 +47,9 @@ public class AStarPath extends Agent {
 		{
 			System.out.println("Either we killed the townhall!!! ...or you didn't provide one");
 		}
+		*/
+		
+		actions = aStarSearch(startid, goalid, state);
 		
 		if(actions == null)
 		{
@@ -59,29 +57,6 @@ public class AStarPath extends Agent {
 		}
 		
 		return actions;
-	}
-
-	@Override
-	public void terminalStep(StateView state) {
-	}
-	
-	//matches units with a type and returns the list of unitIds
-	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
-		
-		List<Integer> unitIds = new ArrayList<Integer>();
-		
-		for (int x = 0; x < ids.size(); x++)
-		{
-			Integer unitId = ids.get(x);
-			UnitView unit = state.getUnit(unitId);
-			
-			if(unit.getTemplateView().getUnitName().equals(name))
-			{
-				unitIds.add(unitId);
-			}
-		}
-		
-		return unitIds;
 	}
 	
 	//A* Search Algorithm
@@ -180,6 +155,25 @@ public class AStarPath extends Agent {
 		}		
 		System.out.println("No path from search space to goal...");
 		return null; //returns null if we don't find anything
+	}
+	
+	//matches units with a type and returns the list of unitIds
+	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
+		
+		List<Integer> unitIds = new ArrayList<Integer>();
+		
+		for (int x = 0; x < ids.size(); x++)
+		{
+			Integer unitId = ids.get(x);
+			UnitView unit = state.getUnit(unitId);
+			
+			if(unit.getTemplateView().getUnitName().equals(name))
+			{
+				unitIds.add(unitId);
+			}
+		}
+		
+		return unitIds;
 	}
 	
 	//Checks if we have reached the goal based on if a neighbor is the goalSpace
