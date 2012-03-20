@@ -1,4 +1,4 @@
-	package edu.cwru.SimpleRTS.agent;
+package edu.cwru.SimpleRTS.agent;
 
 import java.io.*;
 import java.util.*;
@@ -77,8 +77,9 @@ public class Planner {
 	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
 		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		STRIP startSpace = new STRIP(); //starting space
-		startSpace.unit = state.getUnit(startId);
+		STRIP startSpace = new STRIP(); 
+		startSpace.unit = state.getUnit(startId); //starting space
+		
 		UnitView goalSpace = state.getUnit(goalId); //end space //NEEDS TO JUST BE GOAL OF TALLY
 		
 		ArrayList<STRIP> openList = new ArrayList<STRIP>(); //the open list, will hold items to be searched
