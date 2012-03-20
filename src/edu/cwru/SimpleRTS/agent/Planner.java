@@ -39,6 +39,11 @@ public class Planner {
 		List<Integer> townHallIds = findUnitType(allUnitIds, startState, townHall);
 	}
 	
+	/*
+	 * NEED TO CHANGE HASHING TO INCLUDE EXTRA THINGS SUCH AS CURRENT RESOURCES
+	 * 
+	 * 
+	 */
 	//originally A* search
 	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
 		
