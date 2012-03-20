@@ -138,9 +138,9 @@ public class Planner {
 						tempGCost = gCostCalculator(neighbor, currentParent, gCost); //grab it's gCost
 						
 						boolean better = true; //used to check if we found a better gCost in the case of the node all ready being in the openList
-						UnitView tempNeighbor = neighbor; //temp used in case the neighbor isn't in the openList yet
+						STRIP tempNeighbor = neighbor; //temp used in case the neighbor isn't in the openList yet
 						
-						neighbor = checkXYList(openList, neighbor); //check if the neighbor is in the openList
+						neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
 						
 						if (neighbor == (null)) //If the openList doesn't contain this neighbor
 						{
@@ -249,7 +249,7 @@ public class Planner {
 	 */
 	
 	//this calculates the distance between neighbor and currentParent + the g_score of currentParent
-	public Integer gCostCalculator(UnitView neighbor, UnitView currentParent, HashMap<UnitView, Integer> gCost)
+	public Integer gCostCalculator(STRIP neighbor, STRIP currentParent, HashMap<STRIP, Integer> gCost)
 	{
 		Integer cost = gCost.get(currentParent); //currentParent's gCost
 		
