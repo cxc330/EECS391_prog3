@@ -1,4 +1,4 @@
-package edu.cwru.SimpleRTS.agent;
+	package edu.cwru.SimpleRTS.agent;
 
 import java.io.*;
 import java.util.*;
@@ -36,10 +36,41 @@ public class Planner {
 		finalGoldTally = finalGoldAmount;
 		finalWoodTally = finalWoodAmount;
 		canBuildPeasant = canBuildP;
+		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		List<Integer> allUnitIds = startState.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, startState, peasant);
 		List<Integer> townHallIds = findUnitType(allUnitIds, startState, townHall);
+		
+		ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
+		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
+		
+		addResources(Type.GOLD_MINE, gold, startState);
+		addResources(Type.TREE, gold, startState);
+		
+	}
+	
+	
+	public void addResources(Type resourceType, ArrayList<ResourceInfo> resources, StateView state)
+	{
+		List<Integer> resourceIds = state.getResourceNodeIds(resourceType);
+		
+		for (Integer resourceId: resourceIds)
+		{
+			ResourceInfo resource = new ResourceInfo();
+			
+			resource.x = state.getResourceNode(resourceId).getXPosition();
+			resource.y = state.getResourceNode(resourceId).getYPosition();
+			
+			resources.add(resource);
+		}
+		
+		//JEFF ADD totalAvailable TO EACH RESOURCE SHOULD BE BASED ON DISTANCE FROM TOWNHALL
+		/*
+		 * 
+		 * ADDD ME
+		 * 
+		 */
 	}
 	
 	/*
