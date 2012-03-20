@@ -609,7 +609,7 @@ public class Planner {
 		}
 		else if (a.unit.getTemplateView().getUnitName() == move)
 		{
-			hCost += 50;
+			hCost -= (int)DistanceMetrics.chebyshevDistance(a.unit.getXPosition(), a.unit.getYPosition(), b.unit.getXPosition(), b.unit.getYPosition());
 		}
 		return hCost;
 	}
