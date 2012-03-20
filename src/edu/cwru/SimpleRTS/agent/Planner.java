@@ -75,6 +75,7 @@ public class Planner {
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
+		startSpace.gold.addAll(gold);
 		
 		STRIP goalSpace = new STRIP(); //end space //NEEDS TO JUST BE GOAL OF TALLY
 		goalSpace.unit = state.getUnit(goalId);
@@ -101,9 +102,9 @@ public class Planner {
 		
 		while (openList.size() > 0) //loop till we exhaust the openList
 		{
-			UnitView currentParent = getLowestCostF(openList, fCost); //finds the UnitView with the lowest fCost
+			STRIP currentParent = getLowestCostF(openList, fCost); //finds the UnitView with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.getXPosition() + ", " + currentParent.getYPosition() + " There are " + openList.size() + " items on the OL");
+			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " + currentParent.unit.getYPosition() + " There are " + openList.size() + " items on the OL");
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
 				System.out.println("Woot, found the goal");
@@ -190,24 +191,10 @@ public class Planner {
 	 * 
 	 * 
 	 */	
-	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
+	public boolean checkGoal(STRIP neighbor, STRIP goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
 	{
 		
-		ArrayList<UnitView> units = getNeighbors(neighbor, state, true);
-		
-		Integer x = goal.getXPosition();
-		Integer y = goal.getYPosition();
-		
-		for (UnitView unit : units) //for all neighbors
-		{
-			Integer unitX = unit.getXPosition();
-			Integer unitY = unit.getYPosition();
-			
-			if (x == unitX && y == unitY) //if it's the same as the goal x, y
-			{
-				return true; //we found it!
-			}
-		}
+		//if (neighbor.)
 		
 		return false;
 	}
