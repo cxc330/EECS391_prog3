@@ -3,11 +3,8 @@ package edu.cwru.SimpleRTS.agent;
 import java.io.*;
 import java.util.*;
 
-import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
-import edu.cwru.SimpleRTS.model.Direction;
 import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
-import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
@@ -17,7 +14,6 @@ import edu.cwru.SimpleRTS.util.DistanceMetrics;
 public class Planner {
 
 	private static final long serialVersionUID = 1L;
-	static int playernum = 0;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
 	static String farm = "Farm";
@@ -28,13 +24,16 @@ public class Planner {
 	static String move = "move";
 	static String gather = "gather";
 	static String deposit = "deposit";
-	private int finalGoldTally = 200;
-	private int finalWoodTally = 200;
 	static int goldWeCanCarry = 50;
 	static int woodWeCanCarry = 20;
+	static int playernum = 0;
+	
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan;
+	private int finalGoldTally = 200;
+	private int finalWoodTally = 200;
+	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
 	
@@ -42,18 +41,13 @@ public class Planner {
 	{
 		finalGoldTally = finalGoldAmount;
 		finalWoodTally = finalWoodAmount;
-		canBuildPeasant = canBuildP;
-		
-		List<Integer> allUnitIds = startState.getAllUnitIds();
-		List<Integer> peasantIds = findUnitType(allUnitIds, startState, peasant);
-		
+		canBuildPeasant = canBuildP;		
 		
 		ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
 		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
 		
 		addResources(Type.GOLD_MINE, gold, startState);
-		addResources(Type.TREE, lumber, startState);
-		
+		addResources(Type.TREE, lumber, startState);		
 	}
 	
 	
@@ -105,15 +99,15 @@ public class Planner {
 		{
 			STRIP currentParent = getLowestCostF(openList, fCost); //finds the STRIP with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " + currentParent.unit.getYPosition() + 
+			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " 
+					+ currentParent.unit.getYPosition() + 
 					" There are " + openList.size() + " items on the OL");
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
-				System.out.println("Woot, found the goal");			
+				System.out.println("Woot, found the goal");					
 				
-				
-					return rebuildPath(parentNodes, currentParent, startSpace);
+				return rebuildPath(parentNodes, currentParent, startSpace);
 			}
 			else //keep on searching
 			{
