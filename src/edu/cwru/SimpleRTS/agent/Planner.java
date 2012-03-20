@@ -201,7 +201,11 @@ public class Planner {
 	public boolean checkGoal(STRIP neighbor, STRIP goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
 	{
 		
-		//if (neighbor.)
+		if (neighbor.goldCollected >= goal.goldCollected &&
+				neighbor.woodCollected >= goal.woodCollected )
+		{
+			return true;
+		}
 		
 		return false;
 	}
