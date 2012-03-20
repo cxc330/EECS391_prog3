@@ -25,6 +25,9 @@ public class Planner {
 	static String footman = "Footman";
 	static String lumber = "lumber";
 	static String gold = "gold";
+	static String move = "move";
+	static String gather = "gather";
+	static String deposit = "deposit";
 	private int finalGoldTally = 200;
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
@@ -100,8 +103,8 @@ public class Planner {
 		gCost.put(startSpace, tempGCost); //add the gCost to the HashMap
 		fCost.put(startSpace, tempFCost); //add the fCost to the HashMap
 		
-		System.out.println("Start space: " + startSpace.getXPosition()  + ", " + startSpace.getYPosition());
-		System.out.println("Goal space: " + goalSpace.getXPosition()  + ", " + goalSpace.getYPosition());
+		System.out.println("Start space: " + startSpace.unit.getXPosition()  + ", " + startSpace.unit.getYPosition());
+		System.out.println("Goal space: " + goalSpace.unit.getXPosition()  + ", " + goalSpace.unit.getYPosition());
 		
 		while (openList.size() > 0) //loop till we exhaust the openList
 		{
@@ -255,9 +258,9 @@ public class Planner {
 	}
 	
 	//Goes through oList and checks against Hashmap fCost to find the UnitView with the lowest fCost
-	public UnitView getLowestCostF(ArrayList<UnitView> oList, HashMap<UnitView, Integer> fCost)
+	public STRIP getLowestCostF(ArrayList<STRIP> oList, HashMap<STRIP, Integer> fCost)
 	{
-		UnitView lowestCostF = oList.get(0); // set the first node as the lowest case
+		STRIP lowestCostF = oList.get(0); // set the first node as the lowest case
 		
 		for(int i = 0; i < oList.size(); i++) // for every item within the list
 		{
