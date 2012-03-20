@@ -653,7 +653,6 @@ public class Planner {
 			for(int i = 0; i < a.size(); i++)
 			{
 				planFile.write(a.get(i));
-				planFile.newLine();
 			}
 			planFile.close();
 		}
