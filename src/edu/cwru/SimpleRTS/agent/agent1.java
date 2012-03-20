@@ -20,7 +20,7 @@ public class agent1 extends Agent {
 	static String barracks = "Barracks";
 	static String footman = "Footman";
 
-	public SearchAgent(int playernum) {
+	public agent1(int playernum) {
 		super(playernum);
 		// TODO Auto-generated constructor stub
 	}
@@ -44,7 +44,7 @@ public class agent1 extends Agent {
 		
 		if	(townHallIds.size() > 0) //If the town hall isn't dead
 		{
-			actions = aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
+			actions = null;//aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
 		}	
 		else
 		{
