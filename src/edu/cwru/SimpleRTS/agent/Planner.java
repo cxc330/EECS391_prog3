@@ -72,9 +72,8 @@ public class Planner {
 	}
 	
 	//originally A* search
-	public Map<Integer, Action> generatePlan(Integer startId, Integer goalId, StateView state)	{
-		
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+	public ArrayList<STRIP> generatePlan(Integer startId, Integer goalId, StateView state)	
+	{		
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId); //starting space
 		startSpace.gold.addAll(goldList);
@@ -113,14 +112,8 @@ public class Planner {
 			{
 				System.out.println("Woot, found the goal");			
 				
-				{
-					/*
-					 * TODO: CHANGE TO RETURN LIST
-					 */
-					actions = null;
-					//actions = rebuildPath(parentNodes, currentParent, startSpace); 
-				}
-				return actions; 
+				
+					return rebuildPath(parentNodes, currentParent, startSpace);
 			}
 			else //keep on searching
 			{
@@ -423,13 +416,13 @@ public class Planner {
 	 * MOVE TO peAGENT
 	 */
 	//returns the path from start to goal
-	public Map<Integer, Action> rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
+	public ArrayList<STRIP> rebuildPath(HashMap<STRIP, STRIP> parentNodes, STRIP goalParent, STRIP startParent)
 	{
-		ArrayList<UnitView> backwardsPath = new ArrayList<UnitView>(); //The path backwards
-		Map<Integer, Action> path = new HashMap<Integer, Action>(); //The return set of actions
+		ArrayList<STRIP> backwardsPath = new ArrayList<STRIP>(); //The path backwards
 		backwardsPath.add(goalParent); //add the goal as our first action
+		ArrayList<STRIP> returnPath = new ArrayList<STRIP>();
 		
-		UnitView parentNode = parentNodes.get(goalParent);
+		STRIP parentNode = parentNodes.get(goalParent);
 		backwardsPath.add(parentNode);
 		
 		while (!parentNode.equals(startParent)) //run till we find the starting node
@@ -440,36 +433,13 @@ public class Planner {
 		
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
-			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
-			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
-			
-			Direction d = Direction.EAST; //default value
-			
-			if(xDiff < 0 && yDiff > 0) //NW
-				d = Direction.NORTHEAST;
-			else if(xDiff == 0 && yDiff > 0) //N
-				d = Direction.NORTH;
-			else if(xDiff > 0 && yDiff > 0) //NE
-				d = Direction.NORTHWEST;
-			else if(xDiff < 0 && yDiff == 0) //E
-				d = Direction.EAST;
-			else if(xDiff < 0 && yDiff < 0) //SE
-				d = Direction.SOUTHEAST;
-			else if(xDiff == 0 && yDiff < 0) //S
-				d = Direction.SOUTH;
-			else if(xDiff > 0 && yDiff < 0) //SW
-				d = Direction.SOUTHWEST;
-			else if(xDiff > 0 && yDiff == 0) //W
-				d = Direction.WEST;
-			if (i == backwardsPath.size()-1) //only put on the first action
-			{
-				path.put(backwardsPath.get(i).getID(), Action.createPrimitiveMove(backwardsPath.get(i).getID(), d));
-			}
-			System.out.println("Path action: " + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + " Direction: " + d.toString());
+			returnPath.add(backwardsPath.get(i));
+			STRIP action = backwardsPath.get(i);
+			System.out.println("Path action: " + action.unit.getTemplateView().getUnitName() + " FROM: "
+					+ action.unit.getXPosition() + ", " + action.unit.getYPosition());
 		}
 		
-		return path;
-		
+		return returnPath;		
 	}
 	
 	/*
