@@ -43,11 +43,9 @@ public class Planner {
 		finalWoodTally = finalWoodAmount;
 		canBuildPeasant = canBuildP;		
 		
-		ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
-		ArrayList<ResourceInfo> lumber = new ArrayList<ResourceInfo>();
 		
-		addResources(Type.GOLD_MINE, gold, startState);
-		addResources(Type.TREE, lumber, startState);		
+		addResources(Type.GOLD_MINE, goldList, startState);
+		addResources(Type.TREE, lumberList, startState);		
 	}
 	
 	
@@ -129,7 +127,10 @@ public class Planner {
 						boolean better = true; //used to check if we found a better gCost in the case of the node all ready being in the openList
 						STRIP tempNeighbor = neighbor; //temp used in case the neighbor isn't in the openList yet
 						
-						neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
+						if (openList.indexOf(neighbor) > -1)
+							neighbor = openList.get(openList.indexOf(neighbor)); //check if the neighbor is in the openList
+						else
+							neighbor = null;
 						
 						if (neighbor == (null)) //If the openList doesn't contain this neighbor
 						{
@@ -234,13 +235,14 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
-		if (!node.hasGold || !node.hasWood)
+		if ((!node.hasGold && nearestGold != null) || (!node.hasWood && nearestLumber != null))
 		{
-			if (node.goldCollected < finalGoldTally)
+			if (node.goldCollected < finalGoldTally && nearestGold != null)
 			{
-				moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, move);
+				UnitView temp = createOpenSpace(nearestGold.x, nearestGold.y, move);
+				moveMove.unit = temp;
 			}
-			else if (node.woodCollected < finalWoodTally)
+			else if (node.woodCollected < finalWoodTally && nearestLumber != null)
 			{
 				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, move);
 			}
