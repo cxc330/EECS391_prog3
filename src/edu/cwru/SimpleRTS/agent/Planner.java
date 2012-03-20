@@ -247,18 +247,25 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
-		
-		if (node.goldCollected < finalGoldTally)
+		if (!node.hasGold || !node.hasWood)
 		{
-			moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, "move");
+			if (node.goldCollected < finalGoldTally)
+			{
+				moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, "move");
+			}
+			else if (node.woodCollected < finalWoodTally)
+			{
+				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, "move");
+			}
+			else //we have collected enough supplies don't move
+			{
+				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");			
+			}
 		}
-		else if (node.woodCollected < finalWoodTally)
+		else
 		{
-			moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, "move");
-		}
-		else //we have collected enough supplies don't move
-		{
-			moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");			
+			List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
+			moveMove.unit = state.getUnit(townHallIds.get(0));
 		}
 		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "deposit");
