@@ -100,26 +100,23 @@ public class Planner {
 		gCost.put(startSpace, tempGCost); //add the gCost to the HashMap
 		fCost.put(startSpace, tempFCost); //add the fCost to the HashMap
 		
-		System.out.println("Start space: " + startSpace.unit.getXPosition()  + ", " + startSpace.unit.getYPosition());
-		System.out.println("Goal space: " + goalSpace.unit.getXPosition()  + ", " + goalSpace.unit.getYPosition());
-		
 		while (openList.size() > 0) //loop till we exhaust the openList
 		{
-			STRIP currentParent = getLowestCostF(openList, fCost); //finds the UnitView with the lowest fCost
+			STRIP currentParent = getLowestCostF(openList, fCost); //finds the STRIP with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " + currentParent.unit.getYPosition() + " There are " + openList.size() + " items on the OL");
+			System.out.println("Searching.. " + currentParent.unit.getXPosition() + ", " + currentParent.unit.getYPosition() + 
+					" There are " + openList.size() + " items on the OL");
+			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
-				System.out.println("Woot, found the goal");
+				System.out.println("Woot, found the goal");			
 				
-				if(currentParent.equals(startSpace)) //The starting space is the final space, attack the townHall
 				{
-					Action attack = Action.createPrimitiveAttack(startSpace.getID(), goalSpace.getID());
-					actions.put(startSpace.getID(), attack);
-				}
-				else //not quite there
-				{
-					actions = rebuildPath(parentNodes, currentParent, startSpace); 
+					/*
+					 * TODO: CHANGE TO RETURN LIST
+					 */
+					actions = null;
+					//actions = rebuildPath(parentNodes, currentParent, startSpace); 
 				}
 				return actions; 
 			}
@@ -128,13 +125,15 @@ public class Planner {
 				openList.remove(currentParent); //remove the object from the openList and add it to the closed list
 				closedList.add(currentParent);
 				
-				ArrayList<UnitView> neighbors = getNeighbors(currentParent, state, false); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
+				ArrayList<STRIP> neighbors = getActions(currentParent); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
+				
 				System.out.println("Found " + neighbors.size() + " neighbors");
-				for (UnitView neighbor : neighbors) //loop for all neighbors
+				
+				for (STRIP neighbor : neighbors) //loop for all neighbors
 				{
-					System.out.println("Searching neighbor at : " + neighbor.getXPosition() + ", " + neighbor.getYPosition());
+					System.out.println("Searching neighbor at : " + neighbor.unit.getTemplateView().getUnitName() + "");
 					
-					if (checkXYList(closedList, neighbor) == (null)) //only go if the neighbor isn't all ready checked
+					if (closedList.contains(neighbor) == false) //only go if the neighbor isn't all ready checked
 					{
 						tempGCost = gCostCalculator(neighbor, currentParent, gCost); //grab it's gCost
 						
@@ -170,6 +169,41 @@ public class Planner {
 		}		
 		System.out.println("No path from search space to goal...");
 		return null; //returns null if we don't find anything
+	}
+	
+	public ArrayList<STRIP> getActions(STRIP node)
+	{
+		
+		ArrayList<STRIP> returnActions = new ArrayList<STRIP>();
+		
+		STRIP moveMove =  new STRIP();
+		STRIP depositMove = new STRIP();
+		STRIP gatherMove = new STRIP();
+		
+		moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "move");
+		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "deposit");
+		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), "gather");
+		
+		moveMove.gold.addAll(node.gold);
+		moveMove.lumber.addAll(node.lumber);
+		moveMove.goldCollected = node.goldCollected;
+		moveMove.woodCollected = node.woodCollected;
+		
+		depositMove.gold.addAll(node.gold);
+		depositMove.lumber.addAll(node.lumber);
+		depositMove.goldCollected = node.goldCollected;
+		depositMove.woodCollected = node.woodCollected;
+		
+		gatherMove.gold.addAll(node.gold);
+		gatherMove.lumber.addAll(node.lumber);
+		gatherMove.goldCollected = node.goldCollected;
+		gatherMove.woodCollected = node.woodCollected;
+		
+		returnActions.add(moveMove);
+		returnActions.add(depositMove);
+		returnActions.add(gatherMove);
+		
+		return returnActions;		
 	}
 	
 	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	
@@ -348,6 +382,23 @@ public class Planner {
 		return openSpace; //return the UnitView
 	}
 	
+	public UnitView createOpenSpace(Integer x, Integer y, String name) //creates a dummy UnitView at the requested space
+	{
+		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
+		
+		template.setUnitName(name);
+		
+
+		Unit unit = new Unit(template, y);	//The actual Unit
+		
+		unit.setxPosition(x); //set its x
+		unit.setyPosition(y); //set its y
+		
+		UnitView openSpace = new UnitView(unit); //make a UnitView from it
+		
+		return openSpace; //return the UnitView
+	}
+	
 	/*
 	 * Returns type of resource.. if no resource there returns null
 	 * 
@@ -459,6 +510,8 @@ public class Planner {
 		
 		ArrayList<ResourceInfo> gold = a.gold;
 		ArrayList<ResourceInfo> wood = a.lumber;
+		
+		
 		
 		if (b.unit.getTemplateView().getUnitName().equals(gold))
 		{
