@@ -271,9 +271,6 @@ public class Planner {
 		
 		if (checkValidDeposit(node, state) != null)
 		{
-			System.out.println("VALID DEPO");
-			if (node.hasGold)
-				System.out.println("GOT THE GOLD");
 			depositMove.gold.addAll(node.gold);
 			depositMove.lumber.addAll(node.lumber);
 			depositMove.goldCollected = node.goldCollected;
