@@ -52,13 +52,16 @@ public class Planner {
 		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		UnitView startSpace = state.getUnit(startId); //starting space
-		UnitView goalSpace = state.getUnit(goalId); //end space
+		UnitView goalSpace = state.getUnit(goalId); //end space //NEEDS TO JUST BE GOAL OF TALLY
+		
 		ArrayList<UnitView> openList = new ArrayList<UnitView>(); //the open list, will hold items to be searched
 		ArrayList<UnitView> closedList = new ArrayList<UnitView>(); //spaces all ready searched
+		
 		HashMap<UnitView, UnitView> parentNodes = new HashMap<UnitView, UnitView>(); //Parent node, i.e. the node you came from hashed by the UnitView
 		HashMap<UnitView, Integer> gCost = new HashMap<UnitView, Integer>(); //gCost hashed by the UnitView
 		HashMap<UnitView, Integer> fCost = new HashMap<UnitView, Integer>(); //fCost hashed by the UnitView
 		HashMap<UnitView, Integer> hCost = new HashMap<UnitView, Integer>(); //hCost hashed by the UnitView
+		
 		Integer tempHCost = heuristicCostCalculator(startSpace, goalSpace); //get the costs of the starting node
 		Integer tempGCost = 0; //see above
 		Integer tempFCost = tempHCost + tempGCost; //see above
@@ -155,14 +158,13 @@ public class Planner {
 		}
 		return unitIds;
 	}
+	
 	/*
-	 * REWORK: NEEDS TO CHECK GOAL BASED ON IF NEIGHBOR = DEPOSIT THEN WIN
+	 * REWORK: NEEDS TO CHECK GOAL BASED ON IF NEIGHBOR = DEPOSIT && RESOURCE TALLY = GOAL TALLY THEN WIN
 	 * 
 	 * 
 	 * 
-	 */
-	
-	
+	 */	
 	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
 	{
 		
@@ -188,8 +190,8 @@ public class Planner {
 	
 	/*
 	 * NEEDS TO USE gCOST of DEPTH NO LONGER DISTANCE
-	 * 
-	 * 
+	 * EDITED: cjg28
+	 * SHOULD NOW JUST add one to indicate it's depth
 	 * 
 	 */
 	
@@ -198,7 +200,7 @@ public class Planner {
 	{
 		Integer cost = gCost.get(currentParent); //currentParent's gCost
 		
-		cost += heuristicCostCalculator(currentParent, neighbor); //just uses chubeycasdyasi for(neighor, parent) + parent's cost
+		cost += 1; //heuristicCostCalculator(currentParent, neighbor); //just uses chubeycasdyasi for(neighor, parent) + parent's cost
 		
 		return cost;
 		
@@ -298,7 +300,7 @@ public class Planner {
 	/*
 	 * 
 	 * 
-	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RECOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
+	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RESOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
 	 * FIXED: cjg28 10:01AM
 	 * NEEDS TESTED
 	 */
@@ -500,6 +502,5 @@ public class Planner {
 		{
 			System.err.println("Error: " + e.getMessage());
 		}
-	}
-	
+	}	
 }
