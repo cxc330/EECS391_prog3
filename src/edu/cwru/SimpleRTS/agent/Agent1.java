@@ -10,7 +10,7 @@ import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
 import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
-public class agent1 extends Agent {
+public class Agent1 extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	static int playernum = 0;
@@ -20,7 +20,7 @@ public class agent1 extends Agent {
 	static String barracks = "Barracks";
 	static String footman = "Footman";
 
-	public agent1(int playernum) {
+	public Agent1(int playernum) {
 		super(playernum);
 		// TODO Auto-generated constructor stub
 	}
@@ -39,12 +39,12 @@ public class agent1 extends Agent {
 		
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		
-		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
+		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
 		
 		if	(townHallIds.size() > 0) //If the town hall isn't dead
 		{
-			actions = null;//aStarSearch(footmanIds.get(0), townHallIds.get(0), state);
+			actions = aStarSearch(peasantIds.get(0), townHallIds.get(0), state);
 		}	
 		else
 		{
