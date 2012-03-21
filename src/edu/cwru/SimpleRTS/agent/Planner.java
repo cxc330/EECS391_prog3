@@ -12,7 +12,6 @@ import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
 
 public class Planner {
-	private static final long serialVersionUID = 1L;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
 	static String farm = "Farm";

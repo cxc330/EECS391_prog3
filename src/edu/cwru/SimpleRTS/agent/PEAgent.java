@@ -105,11 +105,6 @@ public class PEAgent extends Agent {
 		
 		pID = (ArrayList<Integer>) peasantIds;
 		
-		STRIP tempAction;
-		
-		if (actionsIn.size() > 0)
-			 tempAction = actionsIn.get(0);
-		
 		if (currentAction == null) //grab the first move
 		{
 			actionsIn.remove(0);
