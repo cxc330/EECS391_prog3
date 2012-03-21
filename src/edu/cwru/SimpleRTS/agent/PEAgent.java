@@ -98,6 +98,10 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
+		List<Integer> allUnitIds = state.getAllUnitIds();
+		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
+		
+		pID = (ArrayList<Integer>) peasantIds;
 		
 		STRIP tempAction;
 		
@@ -154,11 +158,11 @@ public class PEAgent extends Agent {
 					{
 						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
 						actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
-						pID.add(peasantTemplate.getID());
 					}
 					actionsIn.remove(0);
 					if (actionsIn.size() > 0)
 						currentAction = actionsIn.get(0);
+					return actionsOut;
 				}
 			}
 			else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
@@ -166,7 +170,8 @@ public class PEAgent extends Agent {
 				boolean contains = false;
 				for (Integer id: pID)
 				{
-					if ( state.getUnit(id) != null && state.getUnit(id).getCargoType() == null)
+					System.out.println(id);
+					if (state.getUnit(id).getCargoType() == null)
 					{
 						actionsOut.put(id, Action.createCompoundGather(id, 
 								state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
