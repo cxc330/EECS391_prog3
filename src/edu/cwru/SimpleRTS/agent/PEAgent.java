@@ -75,7 +75,7 @@ public class PEAgent extends Agent {
 		{
 			index++;
 		}
-		System.out.println("GOLD: " + state.getSupplyAmount(0));
+		System.out.println("WOOD: " + state.getResourceAmount(0, ResourceType.WOOD));
 		System.out.println("PEASANT HAS " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold");
 		
 		return actions;
