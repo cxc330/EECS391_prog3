@@ -99,7 +99,10 @@ public class PEAgent extends Agent {
 		if(currentAction.unit.getTemplateView().getUnitName().equals(move))
 		{
 			actionsIn.remove(0);
-			currentAction = actionsIn.get(0); //grab the next move
+			if (actionsIn.get(0) != null)
+				currentAction = actionsIn.get(0); //grab the next move
+			else
+				return null;
 		}
 		
 		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit))
@@ -109,7 +112,10 @@ public class PEAgent extends Agent {
 			else
 			{
 				actionsIn.remove(0);
-				currentAction = actionsIn.get(0);
+				if (actionsIn.get(0) != null)
+					currentAction = actionsIn.get(0);
+				else
+					return null;
 			}
 		}
 		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
@@ -119,7 +125,10 @@ public class PEAgent extends Agent {
 			else
 			{
 				actionsIn.remove(0);
-				currentAction = actionsIn.get(0);
+				if (actionsIn.get(0) != null)
+					currentAction = actionsIn.get(0);
+				else
+					return null;
 			}
 		}
 		return actionsOut;
