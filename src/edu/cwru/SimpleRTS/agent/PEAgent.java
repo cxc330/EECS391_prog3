@@ -24,6 +24,7 @@ public class PEAgent extends Agent {
 	private int index = 0;
 	private int peasantID;
 	private boolean isMoving = false;
+	public STRIP currentAction = null;
 	
 	public PEAgent(int playernum, String[] args) {
 		super(playernum);
@@ -43,6 +44,7 @@ public class PEAgent extends Agent {
 		
 		//create Planner
 		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant);
+		
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
@@ -63,19 +65,13 @@ public class PEAgent extends Agent {
 
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
-		actions = convertToMap(actionsList.get(index), peasantID, state);
+		actions = convertToMap(actionsList, peasantID, state);
 		System.out.println(actions);
 		if(actions == null)
 		{
 			actions = new HashMap<Integer, Action>();
 		}
 		
-		if(index < actionsList.size()-1 && (!isMoving  || state.getUnit(peasantID).getXPosition() == 1))
-		{
-			System.out.println("CargoAmount: " + state.getUnit(peasantID).getCargoAmount());
-			index++;
-			isMoving = false;
-		}
 		System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
 		System.out.println("PEASANT HAS " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold");
 		
@@ -87,28 +83,45 @@ public class PEAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> convertToMap(STRIP actionsIn, int pID, StateView state)
+	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, int pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
-		if(actionsIn.unit.getTemplateView().getUnitName() == move)
+		
+		STRIP tempAction = actionsIn.get(0);
+		
+		if (currentAction == null) //grab the first move
 		{
-			isMoving = true;
-			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
-		}
-		else if(actionsIn.unit.getTemplateView().getUnitName() == deposit)
-		{
-			actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition())));
-		}
-		else if(actionsIn.unit.getTemplateView().getUnitName() == gather)
-		{
-			actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition())));
+			System.out.println(tempAction.unit.getTemplateView().getUnitName());
+			actionsIn.remove(0);
+			currentAction = actionsIn.get(0);
 		}
 		
-		/*if(state.getUnit(pID).getCargoType() == Type.getResourceType(resource) && state.getUnit(pID).getCargoAmount() > 0)
-        {
-                System.out.println("Peasant " + peasantId + " is carrying " + state.getUnit(peasantId).getCargoAmount() + " gold to the Town Hall.");
-                actionsOut = new TargetedAction(peasantId, ActionType.COMPOUNDDEPOSIT, townHall);
-        }*/
+		if(currentAction.unit.getTemplateView().getUnitName().equals(move))
+		{
+			actionsIn.remove(0);
+			currentAction = actionsIn.get(0); //grab the next move
+		}
+		
+		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit))
+		{
+			if (state.getUnit(pID).getCargoType() != null)
+				actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+			else
+			{
+				actionsIn.remove(0);
+				currentAction = actionsIn.get(0);
+			}
+		}
+		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
+		{
+			if (state.getUnit(pID).getCargoType() == null)
+				actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+			else
+			{
+				actionsIn.remove(0);
+				currentAction = actionsIn.get(0);
+			}
+		}
 		return actionsOut;
 	}
 	
