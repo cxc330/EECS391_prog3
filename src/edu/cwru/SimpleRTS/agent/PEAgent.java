@@ -21,7 +21,8 @@ public class PEAgent extends Agent {
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
-	private int peasantID;
+	private ArrayList<Integer> peasantID;
+	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	
@@ -49,7 +50,7 @@ public class PEAgent extends Agent {
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
-			peasantID = actionsList.get(0).unit.getID();
+			peasantID.add(actionsList.get(0).unit.getID());
 		}	
 		else
 		{
@@ -83,7 +84,7 @@ public class PEAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, int pID, StateView state)
+	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
 		STRIP tempAction;
@@ -109,9 +110,7 @@ public class PEAgent extends Agent {
 		System.out.println("SIZE " + actionsIn.size());
 		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID).getCargoType() != null && actionsIn.size() <= 0))
 		{
-			if (state.getUnit(pID).getCargoType() != null)
-				actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-			else
+			for(int j = 0; j < pID.size(); j++)
 			{
 				if (actionsIn.size() > 0)
 				{
@@ -124,9 +123,7 @@ public class PEAgent extends Agent {
 		}
 		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
 		{
-			if (state.getUnit(pID).getCargoType() == null)
-				actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-			else
+			for(int j = 0; j < pID.size(); j++)
 			{
 				if (actionsIn.size() > 0)
 				{
