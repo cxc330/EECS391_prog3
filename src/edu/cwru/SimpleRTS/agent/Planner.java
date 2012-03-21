@@ -71,12 +71,14 @@ public class Planner {
 	//originally A* search
 	public ArrayList<STRIP> generatePlan(Integer startId, Integer goalId, StateView state)	
 	{		
+		//start space
 		STRIP startSpace = new STRIP(); 
-		startSpace.unit = state.getUnit(startId); //starting space
+		startSpace.unit = state.getUnit(startId);
 		startSpace.gold.addAll(goldList);
 		startSpace.lumber.addAll(lumberList);
 		
-		STRIP goalSpace = new STRIP(); //end space //NEEDS TO JUST BE GOAL OF TALLY
+		//goal space
+		STRIP goalSpace = new STRIP();
 		goalSpace.unit = state.getUnit(goalId);
 		goalSpace.goldCollected = finalGoldTally;
 		goalSpace.woodCollected = finalWoodTally;
@@ -100,16 +102,17 @@ public class Planner {
 		
 		while (openList.size() > 0) //loop till we exhaust the openList
 		{
-			STRIP currentParent = getLowestCostF(openList, fCost); //finds the STRIP with the lowest fCost
+			STRIP currentParent = getLowestCostF(openList, fCost, state); //finds the STRIP with the lowest fCost
 
-			System.out.println("Searching.. " + currentParent.unit.getTemplateView().getUnitName() + " " + currentParent.unit.getXPosition() + ", " 
+			System.out.println();
+			System.out.println();
+			System.out.println("CURRENTPARENT: " + currentParent.unit.getTemplateView().getUnitName() + " " + currentParent.unit.getXPosition() + ", " 
 					+ currentParent.unit.getYPosition() + 
-					" There are " + openList.size() + " items on the OL");
+					" There are " + openList.size() + " items on the OPENLIST");
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
-				System.out.println("Woot, found the goal");					
-				
+				System.out.println("Woot, found the goal");	
 				return rebuildPath(parentNodes, currentParent, startSpace);
 			}
 			else //keep on searching
@@ -117,7 +120,7 @@ public class Planner {
 				openList.remove(currentParent); //remove the object from the openList and add it to the closed list
 				closedList.add(currentParent);
 				
-				ArrayList<STRIP> neighbors = getActions(currentParent, state); //We need to implement neighbor checking and only return valid neighbor types.. i.e. movable squares
+				ArrayList<STRIP> neighbors = getActions(currentParent, state);
 				
 				System.out.println("Found " + neighbors.size() + " neighbors");
 				
@@ -158,7 +161,6 @@ public class Planner {
 					}
 					else
 					{
-						//System.out.println("")
 					}
 				}
 			}
@@ -167,11 +169,7 @@ public class Planner {
 		return null; //returns null if we don't find anything
 	}
 	
-	/*
-	 * Returns nearest resource. If none harvestable it returns null
-	 * 
-	 * 
-	 */
+	//Returns nearest resource. If none harvestable it returns null
 	public ResourceInfo findNearestResource(STRIP node, ArrayList<ResourceInfo> resources)
 	{
 		ResourceInfo returnResource = null;
@@ -181,8 +179,8 @@ public class Planner {
 		{
 			if (resource.totalAvailable > 0) //ensure it's not a dead node
 			{
-				Integer distance = DistanceMetrics.chebyshevDistance(node.unit.getXPosition(), node.unit.getYPosition(),
-						resource.x, resource.y);
+				Integer distance = DistanceMetrics.chebyshevDistance(node.unit.getXPosition(), node.unit.getYPosition(), resource.x, resource.y);
+				System.out.println("distance : " + distance + " resource: " + resource.type.name() + " X: " + resource.x + " Y: " + resource.y);
 				if (minDistance == -1 || distance < minDistance)
 				{
 					minDistance = distance; 
@@ -194,6 +192,7 @@ public class Planner {
 		return returnResource;
 	}
 	
+	//returns the townHall UnitView if node is at townHall to Deposit
 	public UnitView checkValidDeposit(STRIP node, StateView state)
 	{		
 		List<Integer> townHallIds = findUnitType(state.getAllUnitIds(), state, townHall);
@@ -201,14 +200,11 @@ public class Planner {
 		for (Integer townHallId: townHallIds)
 		{
 			UnitView townHall = state.getUnit(townHallId);
-			
-			if (townHall.getXPosition() == node.unit.getXPosition()
-					&& townHall.getYPosition() == node.unit.getYPosition())
+			if (townHall.getXPosition() == node.unit.getXPosition() && townHall.getYPosition() == node.unit.getYPosition())
 			{
 				return townHall;
 			}
 		}
-		
 		return null;
 	}
 	
@@ -220,8 +216,7 @@ public class Planner {
 		
 		for (ResourceInfo resource: resources)
 		{			
-			if (resource.x == node.unit.getXPosition()
-					&& resource.y == node.unit.getYPosition() && resource.totalAvailable > 0)
+			if (resource.x == node.unit.getXPosition() && resource.y == node.unit.getYPosition() && resource.totalAvailable > 0)
 			{
 				return resource;
 			}
@@ -246,7 +241,6 @@ public class Planner {
 		
 		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
 		{
-			
 			moveMove.peasants = node.peasants + 1;
 			depositMove.peasants = node.peasants + 1;
 			gatherMove.peasants = node.peasants + 1;
@@ -258,19 +252,20 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
+		System.out.println("Nearest Gold: " + nearestGold.x + " " + nearestGold.y);
+		System.out.println("Nearest Wood: " + nearestLumber.x + " " + nearestLumber.y);
 		
-		if ((!node.hasGold && !node.hasWood && (nearestGold != null || nearestLumber != null)) )
+		if ((!node.hasGold && !node.hasWood && (nearestGold != null || nearestLumber != null)))
 		{
 			if (node.goldCollected < finalGoldTally && nearestGold != null)
 			{
-				UnitView temp = createOpenSpace(nearestGold.x, nearestGold.y, move);
-				moveMove.unit = temp;
+				moveMove.unit = createOpenSpace(nearestGold.x, nearestGold.y, move);
 			}
 			else if (node.woodCollected < finalWoodTally && nearestLumber != null)
 			{
 				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, move);
 			}
-			else //we have collected enough supplies don't move
+			else //Gold or Wood collected, don't move
 			{
 				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), move);			
 			}
@@ -324,14 +319,16 @@ public class Planner {
 		{
 			if (validResource.type == Type.GOLD_MINE)
 			{
-				validResource.totalAvailable -= goldWeCanCarry;
+				System.out.println("validResource.totalAvailableGOLD: " + validResource.totalAvailable);
+				//validResource.totalAvailable -= goldWeCanCarry;
 				validResource.collected += goldWeCanCarry;
 				gatherMove.hasGold = true;
 				returnActions.add(gatherMove);
 			}
 			else if (validResource.type == Type.TREE)
 			{
-				validResource.totalAvailable -= woodWeCanCarry;
+				System.out.println("validResource.totalAvailableWOOD: " + validResource.totalAvailable);
+				//validResource.totalAvailable -= woodWeCanCarry;
 				validResource.collected += woodWeCanCarry;
 				gatherMove.hasWood = true;
 				returnActions.add(gatherMove);
@@ -359,22 +356,10 @@ public class Planner {
 		return unitIds;
 	}
 	
-	/*
-	 * REWORK: NEEDS TO CHECK GOAL BASED ON IF NEIGHBOR = DEPOSIT && RESOURCE TALLY = GOAL TALLY THEN WIN
-	 * 
-	 * 
-	 * 
-	 */	
-	public boolean checkGoal(STRIP neighbor, STRIP goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
+	//Checks to see if we have reached goal, which should be the goal amount of Gold and Wood
+	public boolean checkGoal(STRIP neighbor, STRIP goal, StateView state)
 	{
-		
-		if (neighbor.goldCollected >= goal.goldCollected &&
-				neighbor.woodCollected >= goal.woodCollected )
-		{
-			return true;
-		}
-		
-		return false;
+		return (neighbor.goldCollected >= goal.goldCollected && neighbor.woodCollected >= goal.woodCollected );
 	}
 	
 	
@@ -382,9 +367,7 @@ public class Planner {
 	 * NEEDS TO USE gCOST of DEPTH NO LONGER DISTANCE
 	 * EDITED: cjg28
 	 * SHOULD NOW JUST add one to indicate it's depth
-	 * 
 	 */
-	
 	//this calculates the distance between neighbor and currentParent + the g_score of currentParent
 	public Integer gCostCalculator(STRIP neighbor, STRIP currentParent, HashMap<STRIP, Integer> gCost)
 	{
@@ -397,12 +380,6 @@ public class Planner {
 		
 	}
 	
-	
-	/*
-	 * I BELIEVE THIS WILL BE USELESS
-	 * 
-	 * 
-	 */
 	public STRIP checkXYList(ArrayList<STRIP> list, STRIP unit) //Used for checking based on whether or not we all ready have the space of values: x, y
 	{
 		Integer x = unit.unit.getXPosition();
@@ -420,7 +397,7 @@ public class Planner {
 	}
 	
 	//Goes through oList and checks against Hashmap fCost to find the UnitView with the lowest fCost
-	public STRIP getLowestCostF(ArrayList<STRIP> oList, HashMap<STRIP, Integer> fCost)
+	public STRIP getLowestCostF(ArrayList<STRIP> oList, HashMap<STRIP, Integer> fCost, StateView state)
 	{
 		STRIP lowestCostF = oList.get(0); // set the first node as the lowest case
 		
@@ -429,6 +406,19 @@ public class Planner {
 			if(fCost.get(oList.get(i)) < fCost.get(lowestCostF)) //if the new node is lower than the previous
 			{
 				lowestCostF = oList.get(i); //set it
+			}
+		}
+		
+		if(lowestCostF.unit.getTemplateView().getUnitName().equals(gather))
+		{
+			ResourceInfo r = checkValidGather(lowestCostF, state);
+			if(r.type == Type.GOLD_MINE)
+			{
+				r.totalAvailable -= goldWeCanCarry;
+			}
+			else if(r.type == Type.TREE)
+			{
+				r.totalAvailable -= woodWeCanCarry;
 			}
 		}
 		
