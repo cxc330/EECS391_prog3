@@ -22,7 +22,6 @@ public class PEAgent extends Agent {
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
 	private ArrayList<Integer> peasantID = new ArrayList<Integer>();
-	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
@@ -94,11 +93,6 @@ public class PEAgent extends Agent {
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		
 		pID = (ArrayList<Integer>) peasantIds;
-		
-		STRIP tempAction;
-		
-		if (actionsIn.size() > 0)
-			 tempAction = actionsIn.get(0);
 		
 		if (currentAction == null) //grab the first move
 		{
