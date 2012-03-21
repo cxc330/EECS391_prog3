@@ -51,7 +51,8 @@ public class PEAgent extends Agent {
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
-			peasantID.add(actionsList.get(0).unit.getID());
+			if (actionsList != null)
+				peasantID.add(actionsList.get(0).unit.getID());
 		}	
 		else
 		{
@@ -67,6 +68,7 @@ public class PEAgent extends Agent {
 
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
+		if (actionsList != null)
 		actions = convertToMap(actionsList, peasantID, state);
 		
 		if(actions == null)
