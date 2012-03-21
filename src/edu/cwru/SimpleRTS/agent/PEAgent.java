@@ -61,6 +61,9 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> middleStep(StateView state) 
 	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+
+		List<Integer> allUnitIds = state.getAllUnitIds();
+		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		actions = convertToMap(actionsList.get(index), peasantID, state);
 		System.out.println(actions);
 		if(actions == null)
@@ -72,7 +75,9 @@ public class PEAgent extends Agent {
 		{
 			index++;
 		}
-		System.out.println("GOLD: " + state.getResourceAmount(0, ResourceType.GOLD));
+		System.out.println("GOLD: " + state.getSupplyAmount(0));
+		System.out.println("PEASANT HAS " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold");
+		
 		return actions;
 	}
 
