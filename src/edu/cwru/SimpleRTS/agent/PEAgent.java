@@ -23,7 +23,6 @@ public class PEAgent extends Agent {
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
 	private ArrayList<Integer> peasantID = new ArrayList<Integer>();
-	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
@@ -76,7 +75,14 @@ public class PEAgent extends Agent {
 		}
 		
 		System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
-		System.out.println("PEASANT HAS " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold");
+		if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.GOLD)
+			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold.");
+		else if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.WOOD)
+			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " wood.");
+		else if(state.getUnit(peasantIds.get(0)).getCargoAmount() == 0)
+			System.out.println("PEASANT IS CARRYING NOTHING.");
+		else
+			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " of something.");
 		
 		return actions;
 	}
@@ -118,44 +124,44 @@ public class PEAgent extends Agent {
 		}
 		
 		System.out.println("SIZE " + actionsIn.size());
-			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
-			{	
-				boolean contains = false;
-				for (Integer id: pID)
-				{
-					if (state.getUnit(id).getCargoType() != null)
-					{
-						actionsOut.put(id, Action.createCompoundDeposit(id, 
-								state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-						contains = true;
-					}
-				}
-				if (!contains && actionsIn.size() > 0)
-				{
-					actionsIn.remove(0);
-					if (actionsIn.size() > 0)
-						currentAction = actionsIn.get(0);
-				}
-			}
-			else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
+		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
+		{	
+			boolean contains = false;
+			for (Integer id: pID)
 			{
-				boolean contains = false;
-				for (Integer id: pID)
+				if (state.getUnit(id).getCargoType() != null)
 				{
-					if (state.getUnit(id).getCargoType() == null)
-					{
-						actionsOut.put(id, Action.createCompoundGather(id, 
-								state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-						contains = true;
-					}
-				}
-				if (!contains && actionsIn.size() > 0)
-				{
-					actionsIn.remove(0);
-					if (actionsIn.size() > 0)
-						currentAction = actionsIn.get(0);
+					actionsOut.put(id, Action.createCompoundDeposit(id, 
+							state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+					contains = true;
 				}
 			}
+			if (!contains && actionsIn.size() > 0)
+			{
+				actionsIn.remove(0);
+				if (actionsIn.size() > 0)
+					currentAction = actionsIn.get(0);
+			}
+		}
+		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
+		{
+			boolean contains = false;
+			for (Integer id: pID)
+			{
+				if (state.getUnit(id).getCargoType() == null)
+				{
+					actionsOut.put(id, Action.createCompoundGather(id, 
+							state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+					contains = true;
+				}
+			}
+			if (!contains && actionsIn.size() > 0)
+			{
+				actionsIn.remove(0);
+				if (actionsIn.size() > 0)
+					currentAction = actionsIn.get(0);
+			}
+		}
 		return actionsOut;
 	}
 	
