@@ -25,6 +25,7 @@ public class PEAgent extends Agent {
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
+	private int stepCount = 0;
 	
 	public PEAgent(int playernum, String[] args) 
 	{
@@ -41,6 +42,7 @@ public class PEAgent extends Agent {
 	@Override
 	public Map<Integer, Action> initialStep(StateView state) 
 	{
+		stepCount++;
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		townHallIds = findUnitType(allUnitIds, state, townHall);
@@ -62,6 +64,7 @@ public class PEAgent extends Agent {
 	@Override
 	public Map<Integer, Action> middleStep(StateView state) 
 	{
+		stepCount++;
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 
 		List<Integer> allUnitIds = state.getAllUnitIds();
@@ -88,7 +91,8 @@ public class PEAgent extends Agent {
 
 	@Override
 	public void terminalStep(StateView state) {
-
+		stepCount++;
+		System.out.println("stepCount" + stepCount);
 	}
 	
 	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
@@ -157,7 +161,7 @@ public class PEAgent extends Agent {
 						currentAction = actionsIn.get(0);
 				}
 			}
-			if (!contains && actionsIn.size() > 0)
+			else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
 			{
 				boolean contains = false;
 				for (Integer id: pID)
@@ -182,13 +186,6 @@ public class PEAgent extends Agent {
 						currentAction = actionsIn.get(0);
 				}
 			}
-			if (!contains && actionsIn.size() > 0)
-			{
-				actionsIn.remove(0);
-				if (actionsIn.size() > 0)
-					currentAction = actionsIn.get(0);
-			}
-		}
 		return actionsOut;
 	}
 	
