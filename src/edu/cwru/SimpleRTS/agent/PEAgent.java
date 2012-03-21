@@ -83,15 +83,15 @@ public class PEAgent extends Agent {
 		if(actionsIn.unit.getTemplateView().getUnitName() == move)
 		{
 			isMoving = true;
-			//actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
-			if(state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()) != null)
+			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
+			/*if(state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()) != null)
 			{
 				actionsOut = astar.aStarSearch(pID, state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()), state);
 			}
 			else if(state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()) != null)
 			{
 				actionsOut = astar.aStarSearch(pID, state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()), state);
-			}
+			}*/
 			
 			if(actionsOut == null)
 			{

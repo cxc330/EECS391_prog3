@@ -58,9 +58,7 @@ public class AStarPath
 		
 		//Start space and end space
 		UnitView startSpace = state.getUnit(startId);
-		System.out.println(startId);
 		UnitView goalSpace = state.getUnit(goalId);
-		System.out.println(goalId);
 		
 		ArrayList<UnitView> openList = new ArrayList<UnitView>(); //the open list, will hold items to be searched
 		ArrayList<UnitView> closedList = new ArrayList<UnitView>(); //spaces all ready searched
@@ -91,15 +89,7 @@ public class AStarPath
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
 				System.out.println("Woot, found the goal");
-				if(currentParent.equals(startSpace)) //The starting space is the final space, attack the townHall
-				{
-					Action attack = Action.createPrimitiveAttack(startSpace.getID(), goalSpace.getID());
-					actions.put(startSpace.getID(), attack);
-				}
-				else
-				{
-					actions = rebuildPath(parentNodes, currentParent, startSpace); 
-				}
+				actions = rebuildPath(parentNodes, currentParent, startSpace); 
 				return actions; 
 			}
 			else
@@ -348,6 +338,7 @@ public class AStarPath
 	//Using chebyshev as our h(n)
 	public Integer heuristicCostCalculator(UnitView a, UnitView b)	
 	{
+		System.out.println(a.getXPosition());
 		return DistanceMetrics.chebyshevDistance(a.getXPosition(), a.getYPosition(), b.getXPosition(), b.getYPosition());
 	}
 	
