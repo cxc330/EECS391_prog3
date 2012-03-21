@@ -11,6 +11,7 @@ public class STRIP {
 	public ArrayList<ResourceInfo> gold = new ArrayList<ResourceInfo>();
 	public Integer goldCollected = 0;
 	public Integer woodCollected = 0;
+	public int peasants = 1;
 	public boolean hasGold = false;
 	public boolean hasWood = false;
 }

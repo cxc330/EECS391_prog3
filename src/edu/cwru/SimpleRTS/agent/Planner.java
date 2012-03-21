@@ -24,9 +24,11 @@ public class Planner {
 	static String move = "move";
 	static String gather = "gather";
 	static String deposit = "deposit";
+	static String build = "build";
 	static int goldWeCanCarry = 50;
 	static int woodWeCanCarry = 20;
 	static int playernum = 0;
+	static int costOfPeasant = 400;
 	
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
@@ -234,6 +236,11 @@ public class Planner {
 		STRIP moveMove =  new STRIP();
 		STRIP depositMove = new STRIP();
 		STRIP gatherMove = new STRIP();
+		STRIP buildPeasantMove = new STRIP();
+		
+		moveMove.peasants = node.peasants;
+		depositMove.peasants = node.peasants;
+		gatherMove.peasants = node.peasants;
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
@@ -264,6 +271,7 @@ public class Planner {
 		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
 		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), gather);
+		buildPeasantMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), build);
 		
 		moveMove.gold.addAll(node.gold);
 		moveMove.lumber.addAll(node.lumber);
@@ -314,6 +322,18 @@ public class Planner {
 				gatherMove.hasWood = true;
 				returnActions.add(gatherMove);
 			}
+		}
+		
+		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
+		{
+			buildPeasantMove.gold.addAll(node.gold);
+			buildPeasantMove.lumber.addAll(node.lumber);
+			buildPeasantMove.goldCollected = node.goldCollected - costOfPeasant;
+			buildPeasantMove.woodCollected = node.woodCollected;
+			buildPeasantMove.hasGold = node.hasGold;
+			buildPeasantMove.hasWood = node.hasWood;
+			buildPeasantMove.peasants = node.peasants + 1;
+			returnActions.add(buildPeasantMove);
 		}
 		
 		returnActions.add(moveMove);
@@ -413,12 +433,6 @@ public class Planner {
 		return lowestCostF; //return our lowest cost
 	}
 	
-	
-	/*
-	 * 
-	 * 
-	 * MOVE TO peAGENT
-	 */
 	//returns the path from start to goal
 	public ArrayList<STRIP> rebuildPath(HashMap<STRIP, STRIP> parentNodes, STRIP goalParent, STRIP startParent)
 	{
@@ -448,13 +462,6 @@ public class Planner {
 		return returnPath;		
 	}
 	
-	/*
-	 * 
-	 * 
-	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RESOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
-	 * FIXED: cjg28 10:01AM
-	 * NEEDS TESTED
-	 */
 	public UnitView createOpenSpace(Integer x, Integer y, StateView state) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
@@ -636,7 +643,7 @@ public class Planner {
 	public Integer heuristicCostCalculator(STRIP a, STRIP b)	
 	{ 
 				
-		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected;
+		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected + (50 * (numPeasantsToBuild - a.peasants));
 		
 		if (a.unit.getTemplateView().getUnitName() == gather)
 		{
