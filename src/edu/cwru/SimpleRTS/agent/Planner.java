@@ -247,7 +247,7 @@ public class Planner {
 		
 		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
 		{
-
+			
 			moveMove.peasants = node.peasants + 1;
 			depositMove.peasants = node.peasants + 1;
 			gatherMove.peasants = node.peasants + 1;
