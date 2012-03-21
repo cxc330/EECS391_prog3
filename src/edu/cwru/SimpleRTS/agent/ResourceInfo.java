@@ -9,12 +9,15 @@ public class ResourceInfo {
 	public Integer y;
 	public Type type;
 	
+	//Constructor
 	public ResourceInfo (int resourceValue)
 	{
 		totalAvailable = resourceValue;
 	}
 
-	public ResourceInfo() {
-		// TODO Auto-generated constructor stub
+	//Constructor
+	public ResourceInfo() 
+	{
+		
 	}
 }

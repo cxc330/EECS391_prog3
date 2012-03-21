@@ -12,7 +12,6 @@ import edu.cwru.SimpleRTS.util.DistanceMetrics;
 
 
 public class Planner {
-
 	private static final long serialVersionUID = 1L;
 	static String townHall = "TownHall";
 	static String peasant = "Peasant";
@@ -40,13 +39,17 @@ public class Planner {
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
 	public int numPeasantsToBuild = 0;
 	
-	public Planner(StateView startState, int finalGoldAmount, int finalWoodAmount, boolean canBuildP)
+	//Constructor
+	public Planner(StateView startState, int finalGoldAmount, int finalWoodAmount, boolean canBuildP, String fileN)
 	{
 		finalGoldTally = finalGoldAmount;
 		finalWoodTally = finalWoodAmount;
-		canBuildPeasant = canBuildP;		
+		canBuildPeasant = canBuildP;
+		planFileName = fileN;
 		if (canBuildPeasant)
+		{
 			numPeasantsToBuild = peasantsToBuild();
+		}
 		addResources(Type.GOLD_MINE, goldList, startState);
 		addResources(Type.TREE, lumberList, startState);		
 	}
