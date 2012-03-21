@@ -5,7 +5,6 @@ import java.util.*;
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Template.TemplateView;
-import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
 import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 
@@ -68,7 +67,7 @@ public class PEAgent extends Agent {
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
 		actions = convertToMap(actionsList, peasantID, state);
-		System.out.println(actions);
+		
 		if(actions == null)
 		{
 			actions = new HashMap<Integer, Action>();
@@ -110,9 +109,17 @@ public class PEAgent extends Agent {
 		{
 			if (actionsIn.size() > 0)
 			{
+				if(currentAction.buildPeasant)
+				{
+					TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
+					actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+					pID.add(peasantTemplate.getID());
+				}
 				actionsIn.remove(0);
 				if (actionsIn.size() > 0)
 					currentAction = actionsIn.get(0); //grab the next move
+
+				return actionsOut;
 			}
 		}
 		
@@ -123,36 +130,54 @@ public class PEAgent extends Agent {
 			pID.add(peasantTemplate.getID());
 		}
 		
-		System.out.println("SIZE " + actionsIn.size());
-		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
-		{	
-			boolean contains = false;
-			for (Integer id: pID)
-			{
-				if (state.getUnit(id).getCargoType() != null)
+			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
+			{	
+				boolean contains = false;
+				for (Integer id: pID)
 				{
-					actionsOut.put(id, Action.createCompoundDeposit(id, 
-							state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-					contains = true;
+					if (state.getUnit(id) != null && state.getUnit(id).getCargoType() != null)
+					{
+						actionsOut.put(id, Action.createCompoundDeposit(id, 
+								state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+						contains = true;
+					}
+				}
+				if (!contains && actionsIn.size() > 0)
+				{
+					if(currentAction.buildPeasant)
+					{
+						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
+						actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+						pID.add(peasantTemplate.getID());
+					}
+					actionsIn.remove(0);
+					if (actionsIn.size() > 0)
+						currentAction = actionsIn.get(0);
 				}
 			}
 			if (!contains && actionsIn.size() > 0)
 			{
-				actionsIn.remove(0);
-				if (actionsIn.size() > 0)
-					currentAction = actionsIn.get(0);
-			}
-		}
-		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
-		{
-			boolean contains = false;
-			for (Integer id: pID)
-			{
-				if (state.getUnit(id).getCargoType() == null)
+				boolean contains = false;
+				for (Integer id: pID)
 				{
-					actionsOut.put(id, Action.createCompoundGather(id, 
-							state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-					contains = true;
+					if ( state.getUnit(id) != null && state.getUnit(id).getCargoType() == null)
+					{
+						actionsOut.put(id, Action.createCompoundGather(id, 
+								state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+						contains = true;
+					}
+				}
+				if (!contains && actionsIn.size() > 0)
+				{
+					if(currentAction.buildPeasant)
+					{
+						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
+						actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+						pID.add(peasantTemplate.getID());
+					}
+					actionsIn.remove(0);
+					if (actionsIn.size() > 0)
+						currentAction = actionsIn.get(0);
 				}
 			}
 			if (!contains && actionsIn.size() > 0)
