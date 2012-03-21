@@ -22,7 +22,7 @@ public class PEAgent extends Agent {
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
-	private ArrayList<Integer> peasantID;
+	private ArrayList<Integer> peasantID = new ArrayList<Integer>();
 	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
@@ -116,11 +116,19 @@ public class PEAgent extends Agent {
 		}
 		
 		System.out.println("SIZE " + actionsIn.size());
-		for(int j = 0; j < pID.size(); j++)
-		{
-			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(j)).getCargoType() != null && actionsIn.size() <= 0))
-			{			
-				if (actionsIn.size() > 0)
+			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
+			{	
+				boolean contains = false;
+				for (Integer id: pID)
+				{
+					if (state.getUnit(id).getCargoType() != null)
+					{
+						actionsOut.put(id, Action.createCompoundDeposit(id, 
+								state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+						contains = true;
+					}
+				}
+				if (!contains && actionsIn.size() > 0)
 				{
 					actionsIn.remove(0);
 					if (actionsIn.size() > 0)
@@ -129,14 +137,23 @@ public class PEAgent extends Agent {
 			}
 			else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
 			{
-				if (actionsIn.size() > 0)
+				boolean contains = false;
+				for (Integer id: pID)
+				{
+					if (state.getUnit(id).getCargoType() == null)
+					{
+						actionsOut.put(id, Action.createCompoundGather(id, 
+								state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+						contains = true;
+					}
+				}
+				if (!contains && actionsIn.size() > 0)
 				{
 					actionsIn.remove(0);
 					if (actionsIn.size() > 0)
 						currentAction = actionsIn.get(0);
-				}	
+				}
 			}
-		}
 		return actionsOut;
 	}
 	
