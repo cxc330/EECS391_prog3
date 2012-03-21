@@ -18,13 +18,34 @@ public class PEAgent extends Agent {
 	private int finalGoldTally = 200;
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
-
+	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
+	private int index = 0;
+	private int peasantID;
+	private AStarPath astar = new AStarPath(playernum);
+	
 	public PEAgent(int playernum) {
 		super(playernum);
 	}
 
 	@Override
-	public Map<Integer, Action> initialStep(StateView state) {
+	public Map<Integer, Action> initialStep(StateView state) 
+	{
+		List<Integer> allUnitIds = state.getAllUnitIds();
+		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
+		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
+		
+		//create Planner
+		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant);
+		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
+		{
+			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
+			peasantID = actionsList.get(0).unit.getID();
+			index = 0;
+		}	
+		else
+		{
+			System.out.println("TownHall.size() <= 0. Where is it?!!");
+		}
 		return middleStep(state);
 	}
 
@@ -32,27 +53,18 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> middleStep(StateView state) 
 	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		List<Integer> allUnitIds = state.getAllUnitIds();
-		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
-		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
-		
-		//create Planner
-		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant);
-		
-		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
-		{
-			actions = convertArrayListToMap(planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state));
-		}	
-		else
-		{
-			System.out.println("TownHall.size() <= 0. Where is it?!!");
-		}
-		
+		actions = convertToMap(actionsList.get(index), peasantID);
+		System.out.println(actions);
 		if(actions == null)
 		{
-			;//TODO
+			actions = new HashMap<Integer, Action>();
 		}
-		return new HashMap<Integer, Action>();
+		
+		if(index < actionsList.size()-1)
+		{
+			index++;
+		}
+		return actions;
 	}
 
 	@Override
@@ -60,23 +72,21 @@ public class PEAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> convertArrayListToMap(ArrayList<STRIP> actionsIn)
+	public Map<Integer, Action> convertToMap(STRIP actionsIn, int pID)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
-		for(int i = 1; i < actionsIn.size(); i++)
+		if(actionsIn.unit.getTemplateView().getUnitName() == move)
 		{
-			if(actionsIn.get(i).unit.getTemplateView().getUnitName() == move)
-			{
-				actionsOut.put(actionsIn.get(i).unit.getID(), Action.createCompoundMove(actionsIn.get(i).unit.getID(), actionsIn.get(i).unit.getXPosition(), actionsIn.get(i).unit.getYPosition()));
-			}
-			else if(actionsIn.get(i).unit.getTemplateView().getUnitName() == deposit)
-			{
-				actionsOut.put(actionsIn.get(i).unit.getID(), Action.createCompoundDeposit(actionsIn.get(i).unit.getID(), actionsIn.get(i-1).unit.getID()));
-			}
-			else if(actionsIn.get(i).unit.getTemplateView().getUnitName() == gather)
-			{
-				actionsOut.put(actionsIn.get(i).unit.getID(), Action.createCompoundGather(actionsIn.get(i).unit.getID(), actionsIn.get(i-1).unit.getID()));
-			}
+			System.out.println(pID);
+			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
+		}
+		else if(actionsIn.unit.getTemplateView().getUnitName() == deposit)
+		{
+			actionsOut.put(pID, Action.createCompoundDeposit(pID, actionsIn.unit.getID()));
+		}
+		else if(actionsIn.unit.getTemplateView().getUnitName() == gather)
+		{
+			actionsOut.put(pID, Action.createCompoundGather(pID, actionsIn.unit.getID()));
 		}
 		return actionsOut;
 	}
