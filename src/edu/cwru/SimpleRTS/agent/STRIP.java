@@ -10,6 +10,7 @@ public class STRIP {
 	public Integer goldCollected = 0;
 	public Integer woodCollected = 0;
 	public int peasants = 1;
+	public boolean buildPeasant = false;
 	public boolean hasGold = false;
 	public boolean hasWood = false;
 }
