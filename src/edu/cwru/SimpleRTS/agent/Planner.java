@@ -24,6 +24,7 @@ public class Planner {
 	static String move = "move";
 	static String gather = "gather";
 	static String deposit = "deposit";
+	static String build = "build";
 	static int goldWeCanCarry = 50;
 	static int woodWeCanCarry = 20;
 	static int playernum = 0;
@@ -235,6 +236,11 @@ public class Planner {
 		STRIP moveMove =  new STRIP();
 		STRIP depositMove = new STRIP();
 		STRIP gatherMove = new STRIP();
+		STRIP buildPeasantMove = new STRIP();
+		
+		moveMove.peasants = node.peasants;
+		depositMove.peasants = node.peasants;
+		gatherMove.peasants = node.peasants;
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
@@ -265,6 +271,7 @@ public class Planner {
 		
 		depositMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), deposit);
 		gatherMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), gather);
+		buildPeasantMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), build);
 		
 		moveMove.gold.addAll(node.gold);
 		moveMove.lumber.addAll(node.lumber);
@@ -317,7 +324,17 @@ public class Planner {
 			}
 		}
 		
-		if (node.goldCollected >= )
+		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
+		{
+			buildPeasantMove.gold.addAll(node.gold);
+			buildPeasantMove.lumber.addAll(node.lumber);
+			buildPeasantMove.goldCollected = node.goldCollected - costOfPeasant;
+			buildPeasantMove.woodCollected = node.woodCollected;
+			buildPeasantMove.hasGold = node.hasGold;
+			buildPeasantMove.hasWood = node.hasWood;
+			buildPeasantMove.peasants = node.peasants + 1;
+			returnActions.add(buildPeasantMove);
+		}
 		
 		returnActions.add(moveMove);
 		
@@ -626,7 +643,7 @@ public class Planner {
 	public Integer heuristicCostCalculator(STRIP a, STRIP b)	
 	{ 
 				
-		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected;
+		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected + (50 * (numPeasantsToBuild - a.peasants));
 		
 		if (a.unit.getTemplateView().getUnitName() == gather)
 		{
