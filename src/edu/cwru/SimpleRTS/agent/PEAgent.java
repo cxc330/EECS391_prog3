@@ -22,9 +22,14 @@ public class PEAgent extends Agent {
 	private int index = 0;
 	private int peasantID;
 	private AStarPath astar = new AStarPath(playernum);
+	private boolean isMoving = false;
 	
-	public PEAgent(int playernum) {
+	public PEAgent(int playernum, String[] args) {
 		super(playernum);
+		if(args[0].equals("true")) //check to see if we can build peasants
+		{
+			canBuildPeasant = true;
+		}
 	}
 
 	@Override
@@ -53,7 +58,7 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> middleStep(StateView state) 
 	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		actions = convertToMap(actionsList.get(index), peasantID);
+		actions = convertToMap(actionsList.get(index), peasantID, state);
 		System.out.println(actions);
 		if(actions == null)
 		{
@@ -72,21 +77,21 @@ public class PEAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> convertToMap(STRIP actionsIn, int pID)
+	public Map<Integer, Action> convertToMap(STRIP actionsIn, int pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
 		if(actionsIn.unit.getTemplateView().getUnitName() == move)
 		{
-			System.out.println(pID);
+			isMoving = true;
 			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
 		}
 		else if(actionsIn.unit.getTemplateView().getUnitName() == deposit)
 		{
-			actionsOut.put(pID, Action.createCompoundDeposit(pID, actionsIn.unit.getID()));
+			actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition())));
 		}
 		else if(actionsIn.unit.getTemplateView().getUnitName() == gather)
 		{
-			actionsOut.put(pID, Action.createCompoundGather(pID, actionsIn.unit.getID()));
+			actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition())));
 		}
 		return actionsOut;
 	}
