@@ -413,12 +413,6 @@ public class Planner {
 		return lowestCostF; //return our lowest cost
 	}
 	
-	
-	/*
-	 * 
-	 * 
-	 * MOVE TO peAGENT
-	 */
 	//returns the path from start to goal
 	public ArrayList<STRIP> rebuildPath(HashMap<STRIP, STRIP> parentNodes, STRIP goalParent, STRIP startParent)
 	{
@@ -448,13 +442,6 @@ public class Planner {
 		return returnPath;		
 	}
 	
-	/*
-	 * 
-	 * 
-	 * NEEDS TO TAKE IN STATE AND CREATE OPEN NODE FOR RESOURCE... IF RESOURCE THEN NEEDS TO SET NAME OF SPACE TO RESOURCE
-	 * FIXED: cjg28 10:01AM
-	 * NEEDS TESTED
-	 */
 	public UnitView createOpenSpace(Integer x, Integer y, StateView state) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
