@@ -50,7 +50,6 @@ public class PEAgent extends Agent {
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
 			peasantID = actionsList.get(0).unit.getID();
-			index = 0;
 		}	
 		else
 		{
