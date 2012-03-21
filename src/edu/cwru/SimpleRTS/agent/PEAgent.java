@@ -22,11 +22,12 @@ public class PEAgent extends Agent {
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
-	private ArrayList<Integer> peasantID;
+	private ArrayList<Integer> peasantID = new ArrayList<Integer>();
 	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
+	
 	public PEAgent(int playernum, String[] args) 
 	{
 		super(playernum);
@@ -108,6 +109,7 @@ public class PEAgent extends Agent {
 					currentAction = actionsIn.get(0); //grab the next move
 			}
 		}
+		
 		if(currentAction.buildPeasant)
 		{
 			TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
