@@ -4,6 +4,8 @@ import java.util.*;
 
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
+import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
+import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 
 public class PEAgent extends Agent {
@@ -70,6 +72,7 @@ public class PEAgent extends Agent {
 		{
 			index++;
 		}
+		System.out.println("GOLD: " + state.getResourceAmount(0, ResourceType.GOLD));
 		return actions;
 	}
 
