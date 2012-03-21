@@ -21,9 +21,7 @@ public class PEAgent extends Agent {
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
-	private int index = 0;
 	private int peasantID;
-	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	
