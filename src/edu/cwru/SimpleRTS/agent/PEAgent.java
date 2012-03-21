@@ -24,15 +24,19 @@ public class PEAgent extends Agent {
 	private int index = 0;
 	private int peasantID;
 	private boolean isMoving = false;
+	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	
-	public PEAgent(int playernum, String[] args) {
+	public PEAgent(int playernum, String[] args) 
+	{
 		super(playernum);
-		
-		if(args[0].equals("true")) //check to see if we can build peasants
+		finalGoldTally = Integer.parseInt(args[0]);
+		finalWoodTally = Integer.parseInt(args[1]);
+		if(args[2].equals("true")) //check to see if we can build peasants
 		{
 			canBuildPeasant = true;
 		}
+		fileName = args[3];
 	}
 
 	@Override
@@ -43,8 +47,7 @@ public class PEAgent extends Agent {
 		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
 		
 		//create Planner
-		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant);
-		
+		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant, fileName);
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
