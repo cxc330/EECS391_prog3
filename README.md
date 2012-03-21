@@ -24,7 +24,13 @@ To Compile:
 
 To Run:
 
-	java -cp lib/SimpleRTSv3.1.jar:src edu.cwru.SimpleRTS.Main --config data/midasConfig.xml data/rc_3m5t.map --agent  edu.cwru.SimpleRTS.agent.PEAgent 0 --agentparam 200 --agentparam 200 --agentparam false --agentparam plan_Section2partA.txt --agent edu.cwru.SimpleRTS.agent.visual.VisualAgent 0 --agentparam true --agentparam true
+	java -cp lib/SimpleRTSv3.1.jar:src edu.cwru.SimpleRTS.Main --config data/midasConfig.xml data/rc_3m5t.map --agent  edu.cwru.SimpleRTS.agent.PEAgent 0 --agentparam 200 --agentparam 400 --agentparam false --agentparam plan_Section2partA.txt --agent edu.cwru.SimpleRTS.agent.visual.VisualAgent 0 --agentparam true --agentparam true
+
+where the agentparams are as follow (in order):
+--agentparam 200 is for gold amount
+--agentparam 400 is for wood amount
+--agentparam false is for a boolean to determine BuildPeasant
+--agentparam plan_Section2partA.txt is the path to put the plan file
 
 ##Prompt
 ###1. Problem Setup
