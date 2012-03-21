@@ -23,8 +23,12 @@ public class PEAgent extends Agent {
 	private int peasantID;
 	private AStarPath astar = new AStarPath(playernum);
 	
-	public PEAgent(int playernum) {
+	public PEAgent(int playernum, String[] args) {
 		super(playernum);
+		if(args[0].equals("true")) //check to see if we can build peasants
+		{
+			canBuildPeasant = true;
+		}
 	}
 
 	@Override
@@ -77,7 +81,6 @@ public class PEAgent extends Agent {
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
 		if(actionsIn.unit.getTemplateView().getUnitName() == move)
 		{
-			System.out.println(pID);
 			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
 		}
 		else if(actionsIn.unit.getTemplateView().getUnitName() == deposit)
