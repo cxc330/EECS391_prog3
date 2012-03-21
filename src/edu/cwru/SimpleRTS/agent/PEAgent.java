@@ -88,6 +88,7 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
+		
 		STRIP tempAction;
 		
 		if (actionsIn.size() > 0)
@@ -105,8 +106,9 @@ public class PEAgent extends Agent {
 			{
 				if(currentAction.buildPeasant)
 				{
+					System.out.println(state.getUnit(pID.get(0)).getTemplateView().getGoldCost());
 					TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
-					actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+					actionsOut.put(townHallIds.get(0), Action.createPrimitiveProduction(townHallIds.get(0), peasantTemplate.getID()));
 					pID.add(peasantTemplate.getID());
 				}
 				actionsIn.remove(0);
@@ -120,7 +122,7 @@ public class PEAgent extends Agent {
 		if(currentAction.buildPeasant)
 		{
 			TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
-			actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+			actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
 			pID.add(peasantTemplate.getID());
 		}
 		
@@ -141,7 +143,7 @@ public class PEAgent extends Agent {
 					if(currentAction.buildPeasant)
 					{
 						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
-						actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+						actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
 						pID.add(peasantTemplate.getID());
 					}
 					actionsIn.remove(0);
@@ -166,7 +168,7 @@ public class PEAgent extends Agent {
 					if(currentAction.buildPeasant)
 					{
 						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
-						actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+						actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
 						pID.add(peasantTemplate.getID());
 					}
 					actionsIn.remove(0);
