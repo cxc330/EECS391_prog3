@@ -86,36 +86,40 @@ public class PEAgent extends Agent {
 	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, int pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
+		STRIP tempAction;
 		
-		STRIP tempAction = actionsIn.get(0);
+		if (actionsIn.size() > 0)
+			 tempAction = actionsIn.get(0);
 		
 		if (currentAction == null) //grab the first move
 		{
-			System.out.println(tempAction.unit.getTemplateView().getUnitName());
 			actionsIn.remove(0);
 			currentAction = actionsIn.get(0);
 		}
 		
 		if(currentAction.unit.getTemplateView().getUnitName().equals(move))
 		{
-			actionsIn.remove(0);
-			if (actionsIn.get(0) != null)
-				currentAction = actionsIn.get(0); //grab the next move
-			else
-				return null;
+			if (actionsIn.size() > 0)
+			{
+				actionsIn.remove(0);
+				if (actionsIn.size() > 0)
+					currentAction = actionsIn.get(0); //grab the next move
+			}
 		}
-		
-		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit))
+		System.out.println("SIZE " + actionsIn.size());
+		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID).getCargoType() != null && actionsIn.size() <= 0))
 		{
 			if (state.getUnit(pID).getCargoType() != null)
 				actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
 			else
 			{
-				actionsIn.remove(0);
-				if (actionsIn.get(0) != null)
-					currentAction = actionsIn.get(0);
-				else
-					return null;
+				if (actionsIn.size() > 0)
+				{
+
+					actionsIn.remove(0);
+					if (actionsIn.size() > 0)
+						currentAction = actionsIn.get(0);
+				}
 			}
 		}
 		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
@@ -124,11 +128,12 @@ public class PEAgent extends Agent {
 				actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
 			else
 			{
-				actionsIn.remove(0);
-				if (actionsIn.get(0) != null)
-					currentAction = actionsIn.get(0);
-				else
-					return null;
+				if (actionsIn.size() > 0)
+				{
+					actionsIn.remove(0);
+					if (actionsIn.size() > 0)
+						currentAction = actionsIn.get(0);
+				}	
 			}
 		}
 		return actionsOut;
