@@ -26,6 +26,7 @@ public class PEAgent extends Agent {
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
 	private int stepCount = 0;
+	private boolean alreadyEnd = false;
 	
 	public PEAgent(int playernum, String[] args) 
 	{
@@ -78,17 +79,33 @@ public class PEAgent extends Agent {
 			actions = new HashMap<Integer, Action>();
 		}
 		
-		System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
-		if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.GOLD)
-			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold.");
-		else if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.WOOD)
-			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " wood.");
-		else if(state.getUnit(peasantIds.get(0)).getCargoAmount() == 0)
-			System.out.println("PEASANT IS CARRYING NOTHING.");
+		if(state.getResourceAmount(playernum, ResourceType.GOLD) >= finalGoldTally && state.getResourceAmount(playernum, ResourceType.WOOD) >= finalWoodTally)
+		{
+			if(!alreadyEnd)
+			{
+				alreadyEnd = true;
+				System.out.println("==========================================");
+				System.out.println("We have reached the end of this episode.");
+				System.out.println("We have gone through " + stepCount + " SimpleRTS steps. (This includes movement from one adjacent square to another, gathering, and depositing resources).");
+				System.out.println("The plan file have also been generated");
+				System.out.println("Please use Ctrl + C to Exit this eipsode.");
+			}
+			return new HashMap<Integer, Action>();
+		}
 		else
-			System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " of something.");
-		
-		return actions;
+		{
+			System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
+			if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.GOLD)
+				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold.");
+			else if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.WOOD)
+				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " wood.");
+			else if(state.getUnit(peasantIds.get(0)).getCargoAmount() == 0)
+				System.out.println("PEASANT IS CARRYING NOTHING.");
+			else
+				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " of something.");
+			
+			return actions;
+		}
 	}
 
 	@Override
