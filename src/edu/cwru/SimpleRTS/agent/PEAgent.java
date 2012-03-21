@@ -26,6 +26,7 @@ public class PEAgent extends Agent {
 	
 	public PEAgent(int playernum, String[] args) {
 		super(playernum);
+		
 		if(args[0].equals("true")) //check to see if we can build peasants
 		{
 			canBuildPeasant = true;
