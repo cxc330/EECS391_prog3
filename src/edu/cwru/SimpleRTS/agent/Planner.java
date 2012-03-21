@@ -27,6 +27,7 @@ public class Planner {
 	static int goldWeCanCarry = 50;
 	static int woodWeCanCarry = 20;
 	static int playernum = 0;
+	static int costOfPeasant = 400;
 	
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
@@ -315,6 +316,8 @@ public class Planner {
 				returnActions.add(gatherMove);
 			}
 		}
+		
+		if (node.goldCollected >= )
 		
 		returnActions.add(moveMove);
 		
