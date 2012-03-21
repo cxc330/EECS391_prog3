@@ -27,6 +27,7 @@ public class PEAgent extends Agent {
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
 	private List<Integer> townHallIds;
+	
 	public PEAgent(int playernum, String[] args) 
 	{
 		super(playernum);
@@ -108,6 +109,7 @@ public class PEAgent extends Agent {
 					currentAction = actionsIn.get(0); //grab the next move
 			}
 		}
+		
 		if(currentAction.buildPeasant)
 		{
 			TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
