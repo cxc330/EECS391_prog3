@@ -4,6 +4,7 @@ import java.util.*;
 
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
+import edu.cwru.SimpleRTS.model.Template.TemplateView;
 import edu.cwru.SimpleRTS.model.resource.ResourceNode.Type;
 import edu.cwru.SimpleRTS.model.resource.ResourceType;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
@@ -25,7 +26,7 @@ public class PEAgent extends Agent {
 	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
-	
+	private List<Integer> townHallIds;
 	public PEAgent(int playernum, String[] args) 
 	{
 		super(playernum);
@@ -43,7 +44,7 @@ public class PEAgent extends Agent {
 	{
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> peasantIds = findUnitType(allUnitIds, state, peasant);
-		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
+		townHallIds = findUnitType(allUnitIds, state, townHall);
 		
 		//create Planner
 		Planner planner = new Planner(state, finalGoldTally, finalWoodTally, canBuildPeasant, fileName);
@@ -107,23 +108,26 @@ public class PEAgent extends Agent {
 					currentAction = actionsIn.get(0); //grab the next move
 			}
 		}
-		System.out.println("SIZE " + actionsIn.size());
-		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID).getCargoType() != null && actionsIn.size() <= 0))
+		if(currentAction.buildPeasant)
 		{
-			for(int j = 0; j < pID.size(); j++)
-			{
+			TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
+			actionsOut.put(peasantTemplate.getID(), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
+			pID.add(peasantTemplate.getID());
+		}
+		
+		System.out.println("SIZE " + actionsIn.size());
+		for(int j = 0; j < pID.size(); j++)
+		{
+			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(j)).getCargoType() != null && actionsIn.size() <= 0))
+			{			
 				if (actionsIn.size() > 0)
 				{
-
 					actionsIn.remove(0);
 					if (actionsIn.size() > 0)
 						currentAction = actionsIn.get(0);
 				}
 			}
-		}
-		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
-		{
-			for(int j = 0; j < pID.size(); j++)
+			else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
 			{
 				if (actionsIn.size() > 0)
 				{
