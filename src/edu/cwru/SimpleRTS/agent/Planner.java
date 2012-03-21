@@ -31,19 +31,20 @@ public class Planner {
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan = new ArrayList<String>();
-	private int finalGoldTally = 1000;
-	private int finalWoodTally = 1000;
+	private int finalGoldTally = 3000;
+	private int finalWoodTally = 2000;
 	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
+	public int numPeasantsToBuild = 0;
 	
 	public Planner(StateView startState, int finalGoldAmount, int finalWoodAmount, boolean canBuildP)
 	{
 		finalGoldTally = finalGoldAmount;
 		finalWoodTally = finalWoodAmount;
 		canBuildPeasant = canBuildP;		
-		
-		
+		if (canBuildPeasant)
+			numPeasantsToBuild = peasantsToBuild();
 		addResources(Type.GOLD_MINE, goldList, startState);
 		addResources(Type.TREE, lumberList, startState);		
 	}
@@ -596,12 +597,44 @@ public class Planner {
 		return neighbors;
 	}
 	
-	/*
-	 * NEEDS TO CALCULATE WHICH MOVE IS BEST
-	 * IF b == NODE AND WE ARE EMPTY THEN hCOST = 0
-	 * 
-	 */
-	public Integer heuristicCostCalculator(STRIP a, STRIP b)	{ 
+	
+	public int peasantsToBuild()
+	{
+		int goal = (finalGoldTally / goldWeCanCarry ) + (finalWoodTally / woodWeCanCarry);
+		
+		int movesPerGold = 4;
+		int costOfPeasant = 8;
+		int numPeasants = 0;
+		int bestMoves = -1;
+		
+		for (int x = 1; x < 4; x++)
+		{			
+			int totalMoves = (movesPerGold / x) * goal;
+			
+			if (bestMoves == -1 || totalMoves < bestMoves)
+			{
+				bestMoves = totalMoves;
+				numPeasants = x - 1;
+			}
+			totalMoves = (movesPerGold / (x + 1)) * goal;
+			
+			for (int y = 1; y < x + 1; y++)
+				totalMoves += ((movesPerGold / y) * costOfPeasant);
+			
+			if (totalMoves < bestMoves)
+			{
+				bestMoves = totalMoves;
+				numPeasants = x;
+			}
+			
+		}
+		
+		return numPeasants;
+		
+	}
+	
+	public Integer heuristicCostCalculator(STRIP a, STRIP b)	
+	{ 
 				
 		Integer hCost = b.goldCollected + b.woodCollected - a.goldCollected - b.goldCollected;
 		
