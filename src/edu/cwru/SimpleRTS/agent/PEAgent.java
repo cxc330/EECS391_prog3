@@ -22,7 +22,7 @@ public class PEAgent extends Agent {
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
 	private int index = 0;
-	private int peasantID;
+	private ArrayList<Integer> peasantID;
 	private boolean isMoving = false;
 	private String fileName = "pln.txt";
 	public STRIP currentAction = null;
@@ -51,7 +51,7 @@ public class PEAgent extends Agent {
 		if	(townHallIds.size() > 0) //TownHall Exists. Check if resources available in here too?
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
-			peasantID = actionsList.get(0).unit.getID();
+			peasantID.add(actionsList.get(0).unit.getID());
 			index = 0;
 		}	
 		else
@@ -86,7 +86,7 @@ public class PEAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, int pID, StateView state)
+	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
 	{
 		Map<Integer, Action> actionsOut = new HashMap<Integer, Action>();
 		
@@ -107,22 +107,28 @@ public class PEAgent extends Agent {
 		
 		if(currentAction.unit.getTemplateView().getUnitName().equals(deposit))
 		{
-			if (state.getUnit(pID).getCargoType() != null)
-				actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-			else
+			for(int j = 0; j < pID.size(); j++)
 			{
-				actionsIn.remove(0);
-				currentAction = actionsIn.get(0);
+				if (state.getUnit(pID.get(j)).getCargoType() != null)
+					actionsOut.put(pID, Action.createCompoundDeposit(pID, state.unitAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+				else
+				{
+					actionsIn.remove(0);
+					currentAction = actionsIn.get(0);
+				}
 			}
 		}
 		else if(currentAction.unit.getTemplateView().getUnitName().equals(gather))
 		{
-			if (state.getUnit(pID).getCargoType() == null)
-				actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
-			else
+			for(int j = 0; j < pID.size(); j++)
 			{
-				actionsIn.remove(0);
-				currentAction = actionsIn.get(0);
+				if (state.getUnit(pID.get(j)).getCargoType() == null)
+					actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(currentAction.unit.getXPosition(), currentAction.unit.getYPosition())));
+				else
+				{
+					actionsIn.remove(0);
+					currentAction = actionsIn.get(0);
+				}
 			}
 		}
 		return actionsOut;
