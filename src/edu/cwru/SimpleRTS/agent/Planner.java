@@ -245,6 +245,18 @@ public class Planner {
 		depositMove.peasants = node.peasants;
 		gatherMove.peasants = node.peasants;
 		
+		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
+		{
+
+			moveMove.peasants = node.peasants + 1;
+			depositMove.peasants = node.peasants + 1;
+			gatherMove.peasants = node.peasants + 1;
+			
+			moveMove.buildPeasant = true;
+			depositMove.buildPeasant = true;
+			gatherMove.buildPeasant = true;
+		}
+		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
 		
@@ -325,18 +337,6 @@ public class Planner {
 				gatherMove.hasWood = true;
 				returnActions.add(gatherMove);
 			}
-		}
-		
-		if (node.goldCollected >= costOfPeasant && node.peasants < numPeasantsToBuild)
-		{
-			buildPeasantMove.gold.addAll(node.gold);
-			buildPeasantMove.lumber.addAll(node.lumber);
-			buildPeasantMove.goldCollected = node.goldCollected - costOfPeasant;
-			buildPeasantMove.woodCollected = node.woodCollected;
-			buildPeasantMove.hasGold = node.hasGold;
-			buildPeasantMove.hasWood = node.hasWood;
-			buildPeasantMove.peasants = node.peasants + 1;
-			returnActions.add(buildPeasantMove);
 		}
 		
 		returnActions.add(moveMove);
@@ -458,6 +458,9 @@ public class Planner {
 			STRIP action = backwardsPath.get(i);
 			String output = "Path action: " + action.unit.getTemplateView().getUnitName() + " FROM: "
 					+ action.unit.getXPosition() + ", " + action.unit.getYPosition() + "\n";
+			
+			if (action.buildPeasant)
+				output += " BUILD PEASANT\n";
 			plan.add(output);
 			System.out.print(output);
 		}

@@ -21,7 +21,6 @@ public class PEAgent extends Agent {
 	private int finalWoodTally = 200;
 	private boolean canBuildPeasant = false;
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
-	private int index = 0;
 	private ArrayList<Integer> peasantID;
 	private boolean isMoving = false;
 	private String fileName = "pln.txt";
@@ -52,7 +51,6 @@ public class PEAgent extends Agent {
 		{
 			actionsList = planner.generatePlan(peasantIds.get(0), townHallIds.get(0), state);
 			peasantID.add(actionsList.get(0).unit.getID());
-			index = 0;
 		}	
 		else
 		{
