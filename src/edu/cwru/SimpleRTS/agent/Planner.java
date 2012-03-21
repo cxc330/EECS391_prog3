@@ -33,6 +33,7 @@ public class Planner {
 	private ArrayList<String> plan = new ArrayList<String>();
 	private int finalGoldTally = 400;
 	private int finalWoodTally = 400;
+	private boolean bool = true;
 	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
@@ -245,6 +246,8 @@ public class Planner {
 			depositMove.peasants = node.peasants + 1;
 			gatherMove.peasants = node.peasants + 1;
 			
+			finalGoldTally += costOfPeasant;
+			
 			moveMove.buildPeasant = true;
 			depositMove.buildPeasant = true;
 			gatherMove.buildPeasant = true;
@@ -252,8 +255,6 @@ public class Planner {
 		
 		ResourceInfo nearestLumber = findNearestResource(node, node.lumber);
 		ResourceInfo nearestGold = findNearestResource(node, node.gold);
-		System.out.println("Nearest Gold: " + nearestGold.x + " " + nearestGold.y);
-		System.out.println("Nearest Wood: " + nearestLumber.x + " " + nearestLumber.y);
 		
 		if ((!node.hasGold && !node.hasWood && (nearestGold != null || nearestLumber != null)))
 		{
@@ -265,7 +266,7 @@ public class Planner {
 			{
 				moveMove.unit = createOpenSpace(nearestLumber.x, nearestLumber.y, move);
 			}
-			else //Gold or Wood collected, don't move
+			else //Gold or Wood collected
 			{
 				moveMove.unit = createOpenSpace(node.unit.getXPosition(), node.unit.getYPosition(), move);			
 			}
@@ -296,13 +297,13 @@ public class Planner {
 			
 			if (node.hasGold)
 			{
-				depositMove.goldCollected += goldWeCanCarry;
+				depositMove.goldCollected += goldWeCanCarry * node.peasants;
 				depositMove.hasGold = false;
 				returnActions.add(depositMove);
 			}
 			else if (node.hasWood)
 			{
-				depositMove.woodCollected += woodWeCanCarry;
+				depositMove.woodCollected += woodWeCanCarry * node.peasants;
 				depositMove.hasWood = false;
 				returnActions.add(depositMove);
 			}
@@ -414,11 +415,11 @@ public class Planner {
 			ResourceInfo r = checkValidGather(lowestCostF, state);
 			if(r.type == Type.GOLD_MINE)
 			{
-				r.totalAvailable -= goldWeCanCarry;
+				r.totalAvailable -= goldWeCanCarry * lowestCostF.peasants;
 			}
 			else if(r.type == Type.TREE)
 			{
-				r.totalAvailable -= woodWeCanCarry;
+				r.totalAvailable -= woodWeCanCarry * lowestCostF.peasants;
 			}
 		}
 		
