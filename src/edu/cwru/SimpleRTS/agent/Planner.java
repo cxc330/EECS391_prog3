@@ -33,8 +33,8 @@ public class Planner {
 	private boolean canBuildPeasant = false;
 	private String planFileName = "plan.txt";
 	private ArrayList<String> plan = new ArrayList<String>();
-	private int finalGoldTally = 3000;
-	private int finalWoodTally = 2000;
+	private int finalGoldTally = 400;
+	private int finalWoodTally = 400;
 	
 	public ArrayList<ResourceInfo> goldList = new ArrayList<ResourceInfo>();
 	public ArrayList<ResourceInfo> lumberList = new ArrayList<ResourceInfo>();
