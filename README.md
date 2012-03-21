@@ -9,7 +9,20 @@ Last update: 3/20/2012
 In this assignment we wrote a forward state space planner to solve a resource collection scenario in the SimpleRTS game. 
 
 ##Instructions On Running
+###Using The Provided Shell Scripts
+We have included a shell script for each of the 4 parts of this assignment. Please run each of the script separately in order to get the result you are looking for.
+The files are:
+section2partA.sh for Gold: 200, Wood: 200, and no BuildPeasant
+section2partB.sh for Gold: 1000, Wood: 1000, and no BuildPeasant
+section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
+section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
 
+###Using Commands
+To Compile:
+	javac -cp 'lib/SimpleRTSv3.1.jar' src/edu/cwru/SimpleRTS/agent/PEAgent.java src/edu/cwru/SimpleRTS/agent/Planner.java src/edu/cwru/SimpleRTS/agent/ResourceInfo.java src/edu/cwru/SimpleRTS/agent/STRIP.java
+
+To Run:
+	java -cp lib/SimpleRTSv3.1.jar:src edu.cwru.SimpleRTS.Main --config data/midasConfig.xml data/rc_3m5t.map --agent  edu.cwru.SimpleRTS.agent.PEAgent 0 --agentparam 200 --agentparam 200 --agentparam false --agentparam plan_Section2partA.txt --agent edu.cwru.SimpleRTS.agent.visual.VisualAgent 0 --agentparam true --agentparam true
 
 ##Prompt
 ###1. Problem Setup
