@@ -23,7 +23,6 @@ public class PEAgent extends Agent {
 	private ArrayList<STRIP> actionsList = new ArrayList<STRIP>();
 	private int index = 0;
 	private int peasantID;
-	private AStarPath astar = new AStarPath(playernum);
 	private boolean isMoving = false;
 	
 	public PEAgent(int playernum, String[] args) {
@@ -71,11 +70,13 @@ public class PEAgent extends Agent {
 			actions = new HashMap<Integer, Action>();
 		}
 		
-		if(index < actionsList.size()-1)
+		if(index < actionsList.size()-1 && (!isMoving  || state.getUnit(peasantID).getXPosition() == 1))
 		{
+			System.out.println("CargoAmount: " + state.getUnit(peasantID).getCargoAmount());
 			index++;
+			isMoving = false;
 		}
-		System.out.println("GOLD: " + state.getSupplyAmount(0));
+		System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
 		System.out.println("PEASANT HAS " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold");
 		
 		return actions;
@@ -93,19 +94,6 @@ public class PEAgent extends Agent {
 		{
 			isMoving = true;
 			actionsOut.put(pID, Action.createCompoundMove(pID, actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()));
-			/*if(state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()) != null)
-			{
-				actionsOut = astar.aStarSearch(pID, state.unitAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()), state);
-			}
-			else if(state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()) != null)
-			{
-				actionsOut = astar.aStarSearch(pID, state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition()), state);
-			}*/
-			
-			if(actionsOut == null)
-			{
-				actionsOut = new HashMap<Integer, Action>();
-			}
 		}
 		else if(actionsIn.unit.getTemplateView().getUnitName() == deposit)
 		{
@@ -115,6 +103,12 @@ public class PEAgent extends Agent {
 		{
 			actionsOut.put(pID, Action.createCompoundGather(pID, state.resourceAt(actionsIn.unit.getXPosition(), actionsIn.unit.getYPosition())));
 		}
+		
+		/*if(state.getUnit(pID).getCargoType() == Type.getResourceType(resource) && state.getUnit(pID).getCargoAmount() > 0)
+        {
+                System.out.println("Peasant " + peasantId + " is carrying " + state.getUnit(peasantId).getCargoAmount() + " gold to the Town Hall.");
+                actionsOut = new TargetedAction(peasantId, ActionType.COMPOUNDDEPOSIT, townHall);
+        }*/
 		return actionsOut;
 	}
 	
