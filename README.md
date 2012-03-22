@@ -17,9 +17,9 @@ The files are:
 
 	./section2partB.sh //for Gold: 1000, Wood: 1000, and no BuildPeasant
 	
-	./section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
+	./section3partA.sh //for Gold: 1000, Wood: 1000, and yes BuildPeasant
 
-	./section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
+	./section3partB.sh //for Gold: 3000, Wood: 2000, and yes BuildPeasant
 
 To Clean Up:
 
