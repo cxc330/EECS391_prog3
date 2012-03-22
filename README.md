@@ -12,10 +12,14 @@ In this assignment we wrote a forward state space planner to solve a resource co
 ###Using The Provided Shell Scripts
 We have included a shell script for each of the 4 parts of this assignment. Please run each of the script separately in order to get the result you are looking for.
 The files are:
-- section2partA.sh for Gold: 200, Wood: 200, and no BuildPeasant
-- section2partB.sh for Gold: 1000, Wood: 1000, and no BuildPeasant
-- section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
-- section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
+
+	./section2partA.sh //for Gold: 200, Wood: 200, and no BuildPeasant
+
+	./section2partB.sh //for Gold: 1000, Wood: 1000, and no BuildPeasant
+	
+	./section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
+
+	./section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
 
 To Clean Up:
 
