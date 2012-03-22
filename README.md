@@ -12,10 +12,17 @@ In this assignment we wrote a forward state space planner to solve a resource co
 ###Using The Provided Shell Scripts
 We have included a shell script for each of the 4 parts of this assignment. Please run each of the script separately in order to get the result you are looking for.
 The files are:
-section2partA.sh for Gold: 200, Wood: 200, and no BuildPeasant
-section2partB.sh for Gold: 1000, Wood: 1000, and no BuildPeasant
-section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
-section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
+- section2partA.sh for Gold: 200, Wood: 200, and no BuildPeasant
+- section2partB.sh for Gold: 1000, Wood: 1000, and no BuildPeasant
+- section3partA.sh for Gold: 1000, Wood: 1000, and yes BuildPeasant
+- section3partB.sh for Gold: 3000, Wood: 2000, and yes BuildPeasant
+
+To Clean Up:
+
+To clean up all the necessary files, we have included a shell script called clean.sh, it will remove all .class files in bin and src, as well as all txt files.
+
+	./clean.sh
+
 
 ###Using Commands
 To Compile:
@@ -26,16 +33,10 @@ To Run:
 
 	java -cp lib/SimpleRTSv3.1.jar:src edu.cwru.SimpleRTS.Main --config data/midasConfig.xml data/rc_3m5t.map --agent  edu.cwru.SimpleRTS.agent.PEAgent 0 --agentparam 200 --agentparam 400 --agentparam false --agentparam plan_Section2partA.txt --agent edu.cwru.SimpleRTS.agent.visual.VisualAgent 0 --agentparam true --agentparam true
 
-where the agentparams are as follow (in order):
+where the agentparams are as follow (in order): 
 
---agentparam 200 is for gold amount
-
---agentparam 400 is for wood amount
-
---agentparam false is for a boolean to determine BuildPeasant
-
---agentparam plan_Section2partA.txt is the path to put the plan file
-
+	--agentparam [goldamount] --agentparam [woodamount] --agentparam [boolean for buildPeasant] --agentparam [filename for plan output]
+	
 ##Prompt
 ###1. Problem Setup
 The scenarios we solved were built around the “rc_3m5t.map” map in SimpleRTS and the “midasConfig” configuration file. In this map, there is a townhall, a peasant, three goldmines and five forests.  Assume the peasant can  only  move between these locations. When the peasant is next to a goldmine, it can execute a HarvestGold operation. This requires the peasant to be carrying nothing and the goldmine to have some gold. If successful, it removes 50 gold from the goldmine and results in the peasant carrying 50 gold. The three goldmines in this map have capacities 100 (nearest to townhall), 500 and 5000 (farthest from townhall) respectively. 

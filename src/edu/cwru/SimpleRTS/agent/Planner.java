@@ -49,6 +49,7 @@ public class Planner {
 		if (canBuildPeasant)
 		{
 			numPeasantsToBuild = peasantsToBuild();
+			//numPeasantsToBuild = 3;
 		}
 		addResources(Type.GOLD_MINE, goldList, startState);
 		addResources(Type.TREE, lumberList, startState);		
@@ -72,6 +73,7 @@ public class Planner {
 	//originally A* search
 	public ArrayList<STRIP> generatePlan(Integer startId, Integer goalId, StateView state)	
 	{		
+		System.out.println("Below is debug output for generating a plan: ");
 		//start space
 		STRIP startSpace = new STRIP(); 
 		startSpace.unit = state.getUnit(startId);
@@ -105,15 +107,12 @@ public class Planner {
 		{
 			STRIP currentParent = getLowestCostF(openList, fCost, state); //finds the STRIP with the lowest fCost
 
-			System.out.println();
-			System.out.println();
-			System.out.println("CURRENTPARENT: " + currentParent.unit.getTemplateView().getUnitName() + " " + currentParent.unit.getXPosition() + ", " 
-					+ currentParent.unit.getYPosition() + 
-					" There are " + openList.size() + " items on the OPENLIST");
+			System.out.println("\nCurrentNode: " + currentParent.unit.getTemplateView().getUnitName() + ", Location: " + currentParent.unit.getXPosition() + ", " 
+					+ currentParent.unit.getYPosition() + ". There are " + openList.size() + " items on the OpenList.");
 			
 			if (checkGoal(currentParent, goalSpace, state)) //success
 			{
-				System.out.println("Woot, found the goal");	
+				System.out.println("\nFound Goal!!!\n");
 				return rebuildPath(parentNodes, currentParent, startSpace);
 			}
 			else //keep on searching
@@ -123,12 +122,11 @@ public class Planner {
 				
 				ArrayList<STRIP> neighbors = getActions(currentParent, state);
 				
-				System.out.println("Found " + neighbors.size() + " neighbors");
+				System.out.println("Found " + neighbors.size() + " possible actions.");
 				
 				for (STRIP neighbor : neighbors) //loop for all neighbors
 				{
-					System.out.println("Searching neighbor at : " + neighbor.unit.getTemplateView().getUnitName() + " to " +
-							 neighbor.unit.getXPosition() + ", " + neighbor.unit.getYPosition());
+					System.out.println("Determining action: " + neighbor.unit.getTemplateView().getUnitName() + " to " + neighbor.unit.getXPosition() + ", " + neighbor.unit.getYPosition());
 					
 					if (checkXYList(closedList, neighbor) == (null)) //only go if the neighbor isn't all ready checked
 					{
@@ -166,7 +164,7 @@ public class Planner {
 				}
 			}
 		}		
-		System.out.println("No path from search space to goal...");
+		System.out.println("\n\n!!!!!!!!!!No path from search space to goal!!!!!!!!!!\n\n");
 		return null; //returns null if we don't find anything
 	}
 	
@@ -181,7 +179,6 @@ public class Planner {
 			if (resource.totalAvailable > 0) //ensure it's not a dead node
 			{
 				Integer distance = DistanceMetrics.chebyshevDistance(node.unit.getXPosition(), node.unit.getYPosition(), resource.x, resource.y);
-				System.out.println("distance : " + distance + " resource: " + resource.type.name() + " X: " + resource.x + " Y: " + resource.y);
 				if (minDistance == -1 || distance < minDistance)
 				{
 					minDistance = distance; 
@@ -320,16 +317,12 @@ public class Planner {
 		{
 			if (validResource.type == Type.GOLD_MINE)
 			{
-				System.out.println("validResource.totalAvailableGOLD: " + validResource.totalAvailable);
-				//validResource.totalAvailable -= goldWeCanCarry;
 				validResource.collected += goldWeCanCarry;
 				gatherMove.hasGold = true;
 				returnActions.add(gatherMove);
 			}
 			else if (validResource.type == Type.TREE)
 			{
-				System.out.println("validResource.totalAvailableWOOD: " + validResource.totalAvailable);
-				//validResource.totalAvailable -= woodWeCanCarry;
 				validResource.collected += woodWeCanCarry;
 				gatherMove.hasWood = true;
 				returnActions.add(gatherMove);
@@ -363,12 +356,6 @@ public class Planner {
 		return (neighbor.goldCollected >= goal.goldCollected && neighbor.woodCollected >= goal.woodCollected );
 	}
 	
-	
-	/*
-	 * NEEDS TO USE gCOST of DEPTH NO LONGER DISTANCE
-	 * EDITED: cjg28
-	 * SHOULD NOW JUST add one to indicate it's depth
-	 */
 	//this calculates the distance between neighbor and currentParent + the g_score of currentParent
 	public Integer gCostCalculator(STRIP neighbor, STRIP currentParent, HashMap<STRIP, Integer> gCost)
 	{
@@ -442,6 +429,7 @@ public class Planner {
 			backwardsPath.add(parentNode);
 		}
 		
+		System.out.println("\nBelow is the plan:");
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
 			returnPath.add(backwardsPath.get(i));
@@ -454,6 +442,7 @@ public class Planner {
 			plan.add(output);
 			System.out.print(output);
 		}
+		System.out.println("\nEnd Of Plan.\n");
 		writeListToFile(plan, planFileName);
 		return returnPath;		
 	}
@@ -659,11 +648,6 @@ public class Planner {
 		return hCost;
 	}
 	
-	/*
-	 * 
-	 * NEEDS TO CHANGE AND BE MODIFIED FOR RESOURCE.. MAYBE EVEN DELETED
-	 * 
-	 */
 	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter) //returns if a space is empty and valid
 	{
 		boolean isResource = state.isResourceAt(x, y); //check if there is a resource here

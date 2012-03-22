@@ -27,6 +27,7 @@ public class PEAgent extends Agent {
 	private List<Integer> townHallIds;
 	private int stepCount = 0;
 	private boolean alreadyEnd = false;
+	private int planCount = 0;
 	
 	public PEAgent(int playernum, String[] args) 
 	{
@@ -86,23 +87,28 @@ public class PEAgent extends Agent {
 				alreadyEnd = true;
 				System.out.println("==========================================");
 				System.out.println("We have reached the end of this episode.");
-				System.out.println("We have gone through " + stepCount + " SimpleRTS steps. (This includes movement from one adjacent square to another, gathering, and depositing resources).");
+				System.out.println("We have gone through " + planCount + " steps (" + stepCount + " SimpleRTS steps). [This includes movement from one adjacent square to another, gathering, and depositing resources].");
 				System.out.println("The plan file have also been generated");
-				System.out.println("Please use Ctrl + C to Exit this eipsode.");
+				System.out.println("Please quit SimpleRTS or use Ctrl + C to Exit this eipsode through the commandline.");
 			}
 			return new HashMap<Integer, Action>();
 		}
 		else
 		{
-			System.out.println("GOLD: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " WOOD: " + state.getResourceAmount(playernum, ResourceType.WOOD));
-			if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.GOLD)
-				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " gold.");
-			else if(state.getUnit(peasantIds.get(0)).getCargoType() == ResourceType.WOOD)
-				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " wood.");
-			else if(state.getUnit(peasantIds.get(0)).getCargoAmount() == 0)
-				System.out.println("PEASANT IS CARRYING NOTHING.");
-			else
-				System.out.println("PEASANT IS CARRYING " + state.getUnit(peasantIds.get(0)).getCargoAmount() + " of something.");
+			System.out.println("Gold: " + state.getResourceAmount(playernum, ResourceType.GOLD) + " Wood: " + state.getResourceAmount(playernum, ResourceType.WOOD) + "");
+			
+			for(int x = 0; x < peasantIds.size(); x++)
+			{
+				if(state.getUnit(peasantIds.get(x)).getCargoType() == ResourceType.GOLD)
+					System.out.println("Peasant is carrying " + state.getUnit(peasantIds.get(x)).getCargoAmount() + " gold.");
+				else if(state.getUnit(peasantIds.get(x)).getCargoType() == ResourceType.WOOD)
+					System.out.println("Peasant is carrying " + state.getUnit(peasantIds.get(x)).getCargoAmount() + " wood.");
+				else if(state.getUnit(peasantIds.get(x)).getCargoAmount() == 0)
+					System.out.println("Peasant is carrying nothing.");
+				else
+					System.out.println("Peasant is carrying " + state.getUnit(peasantIds.get(x)).getCargoAmount() + " of something.");
+			}
+			System.out.println();
 			
 			return actions;
 		}
@@ -110,8 +116,6 @@ public class PEAgent extends Agent {
 
 	@Override
 	public void terminalStep(StateView state) {
-		stepCount++;
-		System.out.println("stepCount" + stepCount);
 	}
 	
 	public Map<Integer, Action> convertToMap(ArrayList<STRIP> actionsIn, ArrayList<Integer> pID, StateView state)
@@ -126,6 +130,7 @@ public class PEAgent extends Agent {
 		{
 			actionsIn.remove(0);
 			currentAction = actionsIn.get(0);
+			planCount++;
 		}
 		
 		if(currentAction.unit.getTemplateView().getUnitName().equals(move))
@@ -137,11 +142,14 @@ public class PEAgent extends Agent {
 					System.out.println(state.getUnit(pID.get(0)).getTemplateView().getGoldCost());
 					TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
 					actionsOut.put(townHallIds.get(0), Action.createPrimitiveProduction(townHallIds.get(0), peasantTemplate.getID()));
-					pID.add(peasantTemplate.getID());
+					//pID.add(peasantTemplate.getID());
 				}
 				actionsIn.remove(0);
 				if (actionsIn.size() > 0)
+				{
 					currentAction = actionsIn.get(0); //grab the next move
+					planCount++;
+				}
 
 				return actionsOut;
 			}
@@ -151,7 +159,7 @@ public class PEAgent extends Agent {
 		{
 			TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
 			actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
-			pID.add(peasantTemplate.getID());
+			//pID.add(peasantTemplate.getID());
 		}
 		
 			if(currentAction.unit.getTemplateView().getUnitName().equals(deposit) || (state.getUnit(pID.get(0)).getCargoType() != null && actionsIn.size() <= 0))
@@ -184,7 +192,6 @@ public class PEAgent extends Agent {
 				boolean contains = false;
 				for (Integer id: pID)
 				{
-					System.out.println(id);
 					if (state.getUnit(id).getCargoType() == null)
 					{
 						actionsOut.put(id, Action.createCompoundGather(id, 
@@ -198,7 +205,7 @@ public class PEAgent extends Agent {
 					{
 						TemplateView peasantTemplate = state.getTemplate(playernum, peasant);
 						actionsOut.put(townHallIds.get(0), Action.createCompoundProduction(townHallIds.get(0), peasantTemplate.getID()));
-						pID.add(peasantTemplate.getID());
+						//pID.add(peasantTemplate.getID());
 					}
 					actionsIn.remove(0);
 					if (actionsIn.size() > 0)
